@@ -8,7 +8,7 @@
 
 # Basic Site Settings
 locale                   : "en-US"
-site_theme               : "default" # The available themes options are "default", "air", "sunrise", "mint", "dirt" and "contrast"
+site_theme               : "air" # The available themes options are "default", "air", "sunrise", "mint", "dirt" and "contrast"
 title                    : "Darshan Jogani"
 title_separator          : "-"
 name                     : &name "Darshan Jogani"
@@ -26,11 +26,22 @@ author:
   avatar           : "profile.png"
   name             : "Darshan Jogani"
   pronouns         : "He/Him" # example: "she/her"  
-  bio              : "Short biography for the left-hand sidebar"
+  bio              : "Doctoral Researcher"
   location         : "Stuttgart, Germany"
   employer         : "German Aerospace Center (DLR)"
   uri              : "https://darshan-jogani.github.io" # URL
   email            : # "none@example.org" 
+  # position         : "Research Engineer | Electrochemical Energy Systems | Techno-Economic Analysis"
+
+  # Research Interests
+  # research_interests:
+  #   - Alkaline Water Electrolysis
+  #   - Power-to-X Technologies
+  #   - Techno-Economic Analysis (TEA)
+  #   - Hydrogen Systems Engineering
+  #   - Process Modeling and Simulation
+  #   - Advanced Control of Energy Systems
+  #   - Sustainable Fuels
 
   # Academic websites
   academia         : # URL

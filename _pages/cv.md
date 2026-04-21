@@ -9,13 +9,31 @@ redirect_from:
 
 {% include base_path %}
 
+
+<div class="cv-download-links">
+  <a href="{{ base_path }}/files/Darshan_Jogani_CV.pdf" class="btn btn--primary">Download CV as PDF</a>
+  <!-- <a href="{{ base_path }}" class="btn btn--inverse">View Markdown CV</a> -->
+</div>
+
+
+Research Interests
+======
+
+* Electrochemical Energy Systems  
+* Hydrogen Technologies  
+* Alkaline Water Electrolysis  
+* Power-to-X Processes  
+* Techno-Economic Analysis  
+* Process Modeling and Control  
+* Sustainable Fuel Pathways  
+
 Education
 ======
-* Ph.D in Version Control Theory, GitHub University, 2018 (expected)
-* M.S. in Jekyll, GitHub University, 2014
-* B.S. in GitHub, GitHub University, 2012
 
-Work experience
+* M.Sc. Chemical and Energy Engineering — Otto-von-Guericke University (Germany), 2025
+* B.E. Chemical Engineering — Gujarat Technological University (India), 2017
+
+<!-- Work experience
 ======
 * Spring 2024: Academic Pages Collaborator
   * GitHub University
@@ -30,35 +48,48 @@ Work experience
 * Summer 2015: Research Assistant
   * GitHub University
   * Duties included: Tagging issues
-  * Supervisor: Professor Git
+  * Supervisor: Professor Git -->
   
-Skills
+Technical Skills
 ======
-* Skill 1
-* Skill 2
-  * Sub-skill 2.1
-  * Sub-skill 2.2
-  * Sub-skill 2.3
-* Skill 3
 
-Publications
+* Modeling & Simulation:
+  * Aspen Plus
+  * MATLAB/Simulink
+  * Dymola
+* Programming:
+  * Python
+* Engineering Expertise:
+  * Techno-economic analysis
+  * Process modeling
+  * System optimization
+  * Electrochemical systems
+* Tools:
+  * LaTeX
+  * Git
+
+<!-- Publications
 ======
+
   <ul>{% for post in site.publications reversed %}
     {% include archive-single-cv.html %}
-  {% endfor %}</ul>
+  {% endfor %}</ul> -->
   
-Talks
+<!-- Talks
 ======
+
   <ul>{% for post in site.talks reversed %}
     {% include archive-single-talk-cv.html  %}
   {% endfor %}</ul>
   
 Teaching
 ======
+
   <ul>{% for post in site.teaching reversed %}
     {% include archive-single-cv.html %}
   {% endfor %}</ul>
   
 Service and leadership
 ======
-* Currently signed in to 43 different slack teams
+
+* Currently signed in to 43 different slack teams -->
