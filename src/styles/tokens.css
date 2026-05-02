@@ -1,0 +1,55 @@
+:root {
+  /* palette */
+  --navy: #0a0f1e;
+  --navy-2: #0e1428;
+  --navy-3: #131a33;
+  --ink: #f4f5f7;
+  --ink-2: #e9ebf0;
+  --teal: #00d4aa;
+  --teal-soft: #00d4aa1a;
+  --indigo: #6366f1;
+  --indigo-soft: #6366f11a;
+  --amber: #f59e0b;
+  --rose: #f87171;
+  --rule: #1f2741;
+  --muted: #94a3b8;
+  --muted-2: #64748b;
+
+  /* semantic (dark default) */
+  --bg: var(--navy);
+  --bg-alt: var(--navy-2);
+  --bg-soft: var(--navy-3);
+  --fg: var(--ink);
+  --fg-soft: var(--muted);
+  --rule-c: var(--rule);
+  --card: #111934cc;
+  --card-bd: #1f2a4d;
+  --accent: var(--teal);
+  --accent-2: var(--indigo);
+  --section-light-bg: #f4f5f7;
+  --section-light-fg: #1a1a2e;
+  --section-light-rule: #d8dbe2;
+
+  /* type */
+  --serif: "Playfair Display", "Times New Roman", serif;
+  --sans: "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --maxw: 1240px;
+  --pad: clamp(20px, 4vw, 56px);
+  --radius: 4px;
+  --radius-lg: 10px;
+  --shadow-1: 0 8px 30px -12px rgba(0,0,0,.5);
+  --shadow-glow: 0 0 60px -10px var(--teal);
+}
+
+html[data-theme="light"] {
+  --bg: #fafafb;
+  --bg-alt: #f4f5f7;
+  --bg-soft: #ffffff;
+  --fg: #0e1426;
+  --fg-soft: #4a5168;
+  --rule-c: #e3e6ec;
+  --card: #ffffff;
+  --card-bd: #e3e6ec;
+}
