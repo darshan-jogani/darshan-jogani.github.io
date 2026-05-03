@@ -32,8 +32,9 @@ export default function PowerToX() {
         <Reveal clip as="h2" className="section-title">From <em>electrons</em> to <em>molecules</em>.</Reveal>
         <Reveal as="p" className="section-intro">A simplified flowsheet for an industrial Power-to-X plant. Renewable electrons drive the electrolyzer; the resulting hydrogen feeds three downstream synthesis routes. Hover any node for details.</Reveal>
 
-        <Reveal className="card flow-wrap">
-          <svg viewBox={`0 0 ${W} ${H}`} className="flow-svg" preserveAspectRatio="xMidYMid meet">
+        <Reveal className="card flow-card">
+          <div className="flow-scroll">
+            <svg viewBox={`0 0 ${W} ${H}`} className="flow-svg" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="edge-grad" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.2"/>
@@ -76,9 +77,11 @@ export default function PowerToX() {
               return (
                 <g key={i}>
                   <path d={d} stroke="var(--fg-soft)" strokeWidth="2.5" fill="none" opacity="0.65" markerEnd="url(#arr)"/>
-                  <circle r="5" fill="var(--accent)" filter="url(#flow-glow)">
-                    <animateMotion dur={`${2.5 + (i % 2)}s`} repeatCount="indefinite" path={d} begin={`${i * -0.5}s`}/>
-                  </circle>
+                  <g>
+                    <animateMotion dur={`${3 + (i % 2)}s`} repeatCount="indefinite" path={d} begin={`${i * -0.5}s`}/>
+                    <circle r="3" fill="#ffffff" />
+                    <circle r="8" fill="var(--accent)" opacity="0.4" filter="url(#flow-glow)" />
+                  </g>
                 </g>
               );
             })}
@@ -91,8 +94,8 @@ export default function PowerToX() {
                     <ellipse cx="0" cy="65" rx="60" ry="15" fill="none" stroke="var(--indigo)" strokeWidth="1" opacity="0.3" pointerEvents="none"/>
                     
                     <foreignObject x="-80" y="-85" width="160" height="160">
-                      <div style={{ width: '100%', height: '100%', cursor: 'grab' }} title="Drag to orbit" onMouseEnter={() => setHover('awe')} onMouseLeave={() => setHover(null)}>
-                        <Canvas camera={{ position: [6, 3, 6], fov: 40 }} dpr={[1, 2]}>
+                      <div xmlns="http://www.w3.org/1999/xhtml" style={{ width: '100%', height: '100%', cursor: 'grab' }} title="Drag to orbit" onMouseEnter={() => setHover('awe')} onMouseLeave={() => setHover(null)}>
+                        <Canvas camera={{ position: [6, 3, 6], fov: 40 }} dpr={[1, 1.5]} performance={{ min: 0.5 }}>
                           <ambientLight intensity={0.5} />
                           <directionalLight position={[5, 8, 5]} intensity={1.2} color="#00d4aa" />
                           <directionalLight position={[-5, 3, -5]} intensity={0.6} color="#6366f1" />
@@ -138,6 +141,7 @@ export default function PowerToX() {
               );
             })}
           </svg>
+          </div>
           <div className="flow-foot">
             <span className="mono small">{hover ? findNode(hover).detail : 'Hover any node to inspect the process details'}</span>
             <span className="mono small accent">η<sub>system</sub> ≈ 62 % HHV · LCOH ≈ €4.20 / kg</span>
@@ -145,8 +149,12 @@ export default function PowerToX() {
         </Reveal>
       </div>
       <style>{`
-        .flow-wrap { padding: 24px; margin-top: 60px; overflow: hidden; }
-        .flow-svg { width: 100%; height: auto; display: block; }
+        .flow-card { padding: 24px; margin-top: 60px; overflow: hidden; background: var(--card); border: 1px solid var(--card-bd); border-radius: var(--radius); }
+        .flow-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 16px; margin-bottom: -4px; }
+        .flow-scroll::-webkit-scrollbar { height: 6px; }
+        .flow-scroll::-webkit-scrollbar-track { background: color-mix(in oklab, var(--rule-c) 50%, transparent); border-radius: 3px; }
+        .flow-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+        .flow-svg { min-width: 900px; width: 100%; height: auto; display: block; }
         .flow-foot { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule-c); display: flex; justify-content: space-between; }
         .small { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--fg-soft); }
         .accent { color: var(--accent); }

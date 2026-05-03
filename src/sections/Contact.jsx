@@ -18,6 +18,37 @@ const SOCIALS = [
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', topic: 'collaboration', msg: '' });
   const [sent, setSent] = useState(false);
+  // Determine if today is a public holiday (simple fixed-date list for Germany)
+  const isPublicHoliday = (d) => {
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const mmdd = `${month}-${day}`;
+    // Common fixed-date public holidays in Germany (not exhaustive)
+    const fixedHolidays = ['01-01', '05-01', '10-03', '12-25', '12-26'];
+    return fixedHolidays.includes(mmdd);
+  };
+
+  const now = new Date();
+  const weekday = now.getDay(); // 0 = Sun, 6 = Sat
+  const holiday = isPublicHoliday(now);
+  const isWeekday = weekday >= 1 && weekday <= 5;
+  let statusText = 'Responsive';
+  let statusClass = 'open';
+  if (holiday) {
+    statusText = 'Public holiday';
+    statusClass = 'closed';
+  } else if (!isWeekday) {
+    statusText = 'Away';
+    statusClass = 'closed';
+  }
+
+  const trackGlow = (e) => {
+    const card = e.currentTarget;
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
+    card.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+  };
+
   const submit = (e) => {
     e.preventDefault();
     const subject = encodeURIComponent(`[Portfolio · ${form.topic}] ${form.name || 'Hello'}`);
@@ -70,14 +101,19 @@ export default function Contact() {
                 )
               ))}
             </div>
-            <div className="ct-quote">
-              <div className="quote-head">
-                <span className="mono small">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                  Office hours
-                </span>
-                <span className="status-badge">Responsive</span>
-              </div>
+            <div className="ct-quote" onMouseMove={trackGlow} onMouseLeave={(e) => { e.currentTarget.style.setProperty('--mx', '50%'); e.currentTarget.style.setProperty('--my', '50%'); }}>
+                <div className="quote-head">
+                    <span className="mono small">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                      Office hours
+                    </span>
+                    <span className={`status-badge ${statusClass}`}>
+                      <svg width="10" height="10" viewBox="0 0 10 10" style={{ overflow: 'visible', flexShrink: 0 }}>
+                        <circle cx="5" cy="5" r="4.5" fill="currentColor" stroke="var(--bg)" strokeWidth="2" className="status-dot" />
+                      </svg>
+                      {statusText}
+                    </span>
+                  </div>
               <p>"Mon – Fri, generally responsive within 48 h.<br/>Weekends are for the family, the food, and the fun."</p>
             </div>
           </Reveal>
@@ -93,6 +129,10 @@ export default function Contact() {
         .ct-side-list { display: flex; flex-direction: column; }
         .ct-row { display: grid; grid-template-columns: 130px 1fr; gap: 16px; padding: 18px 0; border-top: 1px solid var(--rule-c);
           align-items: center; transition: color .2s, padding-left .2s; }
+        @media (max-width: 600px) {
+          .ct-row { grid-template-columns: 1fr; gap: 4px; padding: 16px 0; align-items: flex-start; }
+          .ct-row .v { justify-content: flex-start; }
+        }
         .ct-row:last-child { border-bottom: 1px solid var(--rule-c); }
         .ct-row:not(.static):hover { padding-left: 8px; color: var(--accent); }
         .ct-row .k { color: var(--fg-soft); display: flex; align-items: center; gap: 8px; }
@@ -102,12 +142,27 @@ export default function Contact() {
         .ct-row:not(.static):hover .v { color: var(--accent); }
         .ct-row .arr { opacity: 0; transition: opacity .2s; margin-left: 8px; }
         .ct-row:hover .arr { opacity: 1; }
-        .ct-quote { position: relative; padding: 26px; background: color-mix(in oklab, var(--accent) 5%, transparent); border: 1px solid color-mix(in oklab, var(--accent) 20%, transparent); border-radius: 8px; overflow: hidden; }
-        .ct-quote::after { content: ""; position: absolute; top: 0; right: 0; width: 120px; height: 120px; background: radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 20%, transparent), transparent 70%); pointer-events: none; }
+        .ct-quote { position: relative; padding: 28px; background: var(--card); border: 1px solid var(--card-bd); border-radius: var(--radius); overflow: hidden;
+          transition: all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275); --mx: 50%; --my: 50%; }
+        .ct-quote > * { position: relative; z-index: 2; }
+        .ct-quote::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+          background: var(--accent); opacity: 0; transition: opacity 0.3s; z-index: 2; }
+        .ct-quote::after { content: ""; position: absolute; inset: -1px; border-radius: calc(var(--radius) + 1px);
+          background: radial-gradient(400px circle at var(--mx) var(--my), color-mix(in oklab, var(--accent) 80%, transparent), transparent 40%);
+          opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 1;
+          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+        .ct-quote:hover::before, .ct-quote:hover::after { opacity: 1; }
+        .ct-quote:hover::before { box-shadow: 0 0 20px 2px var(--accent); }
+        .ct-quote:hover { border-color: color-mix(in oklab, var(--accent) 40%, var(--card-bd)); transform: translateY(-4px) scale(1.01); 
+          box-shadow: 0 16px 32px -16px color-mix(in oklab, var(--accent) 30%, transparent); }
         .quote-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .quote-head .small { color: var(--accent); display: flex; align-items: center; gap: 6px; font-weight: 600; }
-        .status-badge { font-family: var(--mono); font-size: 10px; padding: 4px 10px; border-radius: 999px; background: color-mix(in oklab, #10b981 15%, transparent); color: #10b981; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid color-mix(in oklab, #10b981 30%, transparent); }
-        .status-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981; animation: pulse 2s infinite; }
+        .status-badge { font-family: var(--mono); font-size: 10px; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 6px; }
+        .status-badge.open { background: color-mix(in oklab, #10b981 15%, transparent); color: #10b981; border: 1px solid color-mix(in oklab, #10b981 30%, transparent); }
+        .status-badge.closed { background: color-mix(in oklab, #ef4444 12%, transparent); color: #ef4444; border: 1px solid color-mix(in oklab, #ef4444 30%, transparent); }
+        
+        .status-dot { animation: pulse-dot 1.5s infinite; }
+        @keyframes pulse-dot { 0%, 100% { stroke-width: 2px; stroke-opacity: 1; } 50% { stroke-width: 8px; stroke-opacity: 0.4; } }
         .ct-quote p { font-family: var(--serif); font-style: italic; font-size: 16px; line-height: 1.6; color: var(--fg); margin: 0; position: relative; z-index: 2; }
         .small { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
         .field select { width: 100%; padding: 12px 14px; border-radius: 4px; background: transparent; border: 1px solid var(--rule-c); color: var(--fg); font-family: var(--sans); font-size: 14px; transition: border-color .2s; }

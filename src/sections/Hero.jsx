@@ -204,6 +204,101 @@ function Bubbles({ count = 220 }) {
   );
 }
 
+function FireParticles({ count = 80 }) {
+  const meshRef = useRef();
+  const glowRef = useRef();
+  const materialRef = useRef();
+  const glowMatRef = useRef();
+  const dummy = useRef(new THREE.Object3D());
+  const particles = useRef(null);
+
+  if (!particles.current) {
+    particles.current = [];
+    for (let i = 0; i < count; i++) {
+      particles.current.push({
+        x: (Math.random() - 0.5) * 16,
+        y: (Math.random() - 0.5) * 12,
+        z: (Math.random() - 0.5) * 8 - 2,
+        speed: 0.001 + Math.random() * 0.003, // Very slow, gentle float
+        scale: 0.004 + Math.random() * 0.012, // Tiny, elegant sparks
+        wobbleSpeed: 0.2 + Math.random() * 1.0,
+        wobbleOffset: Math.random() * Math.PI * 2,
+        wobbleSize: 0.01 + Math.random() * 0.02,
+        tailLength: 2 + Math.random() * 4,    // Short, soft tails
+      });
+    }
+  }
+
+  useEffect(() => {
+    const syncColor = () => {
+      if (!materialRef.current || !glowMatRef.current) return;
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00d4aa';
+
+      materialRef.current.color.set(isLight ? accent : '#ffffff');
+      materialRef.current.emissive.set(isLight ? accent : '#ffffff');
+      materialRef.current.emissiveIntensity = isLight ? 0.8 : 1.5;
+
+      glowMatRef.current.color.set(accent);
+      glowMatRef.current.emissive.set(accent);
+    };
+    syncColor();
+    const observer = new MutationObserver(syncColor);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
+  useFrame((state) => {
+    if (!meshRef.current || !glowRef.current) return;
+    const time = state.clock.elapsedTime;
+    particles.current.forEach((p, i) => {
+      p.y += p.speed;
+      if (p.y > 6) {
+        p.y = -6;
+        p.x = (Math.random() - 0.5) * 16;
+      }
+
+      const wobbleX = Math.sin(time * p.wobbleSpeed + p.wobbleOffset) * p.wobbleSize;
+      const wobbleZ = Math.cos(time * p.wobbleSpeed + p.wobbleOffset) * p.wobbleSize;
+      const windX = Math.sin(time * 0.2 + p.y * 0.2) * 0.1;
+
+      const lifeProgress = Math.max(0, (p.y + 6) / 12);
+      const currentScale = p.scale * (1 - lifeProgress);
+      const flicker = 0.8 + Math.sin(time * 8 + p.wobbleOffset) * 0.2;
+
+      const posX = p.x + wobbleX + windX;
+      const posY = p.y;
+      const posZ = p.z + wobbleZ;
+
+      dummy.current.position.set(posX, posY, posZ);
+      dummy.current.scale.setScalar(currentScale * flicker);
+      dummy.current.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.current.matrix);
+
+      const tailStretch = p.tailLength * flicker;
+      dummy.current.position.set(posX, posY - (currentScale * tailStretch * 0.5), posZ);
+      dummy.current.scale.set(currentScale * 1.5, currentScale * tailStretch, currentScale * 1.5);
+      dummy.current.updateMatrix();
+      glowRef.current.setMatrixAt(i, dummy.current.matrix);
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
+    glowRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <group>
+      <instancedMesh ref={glowRef} args={[null, null, count]}>
+        <sphereGeometry args={[1, 16, 16]} />
+        <meshStandardMaterial ref={glowMatRef} emissiveIntensity={1} transparent opacity={0.15} depthWrite={false} />
+      </instancedMesh>
+      <instancedMesh ref={meshRef} args={[null, null, count]}>
+        <sphereGeometry args={[1, 16, 16]} />
+        <meshStandardMaterial ref={materialRef} transparent opacity={0.9} depthWrite={false} />
+      </instancedMesh>
+    </group>
+  );
+}
+
 const TOPICS = ['Alkaline Electrolysis',
                         'Power-to-X',
                         'Techno-Economic Analysis',
@@ -254,13 +349,14 @@ export default function Hero() {
   return (
     <header id="top" className="hero">
       <div className="hero-canvas">
-        <Canvas camera={{ position: [0, 0, 9], fov: 45 }} dpr={[1, 2]}>
+        <Canvas camera={{ position: [0, 0, 9], fov: 45 }} dpr={[1, 1.5]}>
           <ambientLight intensity={0.4} color="#4060a0" />
           <directionalLight position={[5, 5, 5]} intensity={1.2} color="#00d4aa" />
           <directionalLight position={[-5, -3, 4]} intensity={0.8} color="#6366f1" />
           <pointLight position={[0, 0, -6]} intensity={0.4} />
           <WaterMolecule />
-          <Bubbles />
+          {/*<Bubbles />*/}
+          <FireParticles />
         </Canvas>
       </div>
       <div className="hero-grid" />
@@ -286,14 +382,14 @@ export default function Hero() {
         <span>48° 44′ N · 9° 6′ E</span>
       </div>
       <a href="#about" className="scroll-cue" onClick={(e) => { e.preventDefault(); document.querySelector('#about').scrollIntoView({ behavior: 'smooth' }); }}>
-        Scroll<span className="line" />
+        <span className="text">Scroll</span><span className="line" />
       </a>
       <style>{`
         .hero { position: relative; min-height: 100vh; height: 100vh;
           display: flex; align-items: center; justify-content: center; overflow: hidden;
           background: radial-gradient(1200px 600px at 50% 30%, #15224b 0%, var(--navy) 60%); color: var(--ink); }
         html[data-theme="light"] .hero { background: radial-gradient(1200px 600px at 50% 30%, #e3ecff 0%, #fafafb 60%); color: #0e1426; }
-        .hero-canvas { position: absolute; inset: 0; z-index: 0; }
+        .hero-canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
         .hero-grid { position: absolute; inset: 0; z-index: 1; pointer-events: none;
           background-image: linear-gradient(to right, color-mix(in oklab, var(--fg) 6%, transparent) 1px, transparent 1px),
                             linear-gradient(to bottom, color-mix(in oklab, var(--fg) 6%, transparent) 1px, transparent 1px);
@@ -322,7 +418,7 @@ export default function Hero() {
         .hero-meta { position: absolute; left: var(--pad); bottom: 28px; z-index: 3;
           font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
           color: var(--fg-soft); display: flex; flex-direction: column; gap: 4px; }
-        .hero-meta .live { color: var(--accent); display: inline-flex; align-items: center; gap: 6px; }
+        .hero-meta .live { color: var(--accent); display: inline-flex; align-items: center; gap: 10px; }
         .hero-meta .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%;
           background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 1.6s infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
@@ -338,6 +434,11 @@ export default function Hero() {
           background: linear-gradient(to bottom, transparent, var(--accent)); box-shadow: 0 4px 10px 1px var(--accent);
           animation: scrollDown 1.8s cubic-bezier(0.7,0,0.3,1) infinite; }
         @keyframes scrollDown { 0% { top: -40px; } 100% { top: 64px; } }
+        
+        @media (max-width: 768px) { 
+          .scroll-cue .text { display: none; } 
+          .hero-meta { max-width: calc(100vw - 80px); } 
+        }
         
         // /* Light Theme Overrides */
         // html[data-theme="light"] .hero h1,

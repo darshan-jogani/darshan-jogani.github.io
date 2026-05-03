@@ -57,13 +57,23 @@ export default function PolarizationCurve() {
 
   useEffect(() => {
     if (!curveRef.current) return;
-    const len = curveRef.current.getTotalLength?.() || 2000;
-    curveRef.current.style.strokeDasharray = len;
-    curveRef.current.style.strokeDashoffset = len;
-    ScrollTrigger.create({
-      trigger: curveRef.current, start: 'top 75%', once: true,
-      onEnter: () => gsap.to(curveRef.current, { strokeDashoffset: 0, duration: 1.6, ease: 'power2.out' }),
+    const ctx = gsap.context(() => {
+      const len = curveRef.current.getTotalLength?.() || 2000;
+      curveRef.current.style.strokeDasharray = len;
+      curveRef.current.style.strokeDashoffset = len;
+      ScrollTrigger.create({
+        trigger: curveRef.current, start: 'top 75%', once: true,
+        onEnter: () => gsap.to(curveRef.current, { 
+          strokeDashoffset: 0, 
+          duration: 1.6, 
+          ease: 'power2.out',
+          onComplete: () => {
+            if (curveRef.current) curveRef.current.style.strokeDasharray = 'none';
+          }
+        }),
+      });
     });
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -107,7 +117,7 @@ export default function PolarizationCurve() {
               <path ref={curveRef} d={dPath(pts_tot)} fill="none" stroke="url(#grad-low)" strokeWidth="2.5" filter="url(#glow)" strokeLinecap="round"/>
               <line x1={ox} y1={oy} x2={ox} y2={Y0} stroke="var(--accent)" strokeOpacity=".4" strokeDasharray="3 4"/>
               <line x1={X0} y1={oy} x2={ox} y2={oy} stroke="var(--accent)" strokeOpacity=".4" strokeDasharray="3 4"/>
-              <circle cx={ox} cy={oy} r="6" fill="var(--accent)" stroke="var(--bg)" strokeWidth="2"/>
+              <circle cx={ox} cy={oy} r="6" fill="var(--accent)" stroke="var(--bg)" strokeWidth="2" className="op-dot"/>
               <g fontFamily="JetBrains Mono, monospace" fontSize="11">
                 <rect x={Math.min(ox + 14, X1 - 124)} y={Math.max(oy - 50, Y1 + 4)} width="120" height="44" rx="2" fill="var(--bg-alt)" stroke="var(--accent)" strokeOpacity=".5"/>
                 <text x={Math.min(ox + 24, X1 - 114)} y={Math.max(oy - 32, Y1 + 22)} fill="var(--fg)">U = {u.toFixed(2)} V</text>
@@ -164,18 +174,30 @@ export default function PolarizationCurve() {
       </div>
 
       <style>{`
-        .viz-wrap { margin-top: 60px; display: grid; grid-template-columns: 1fr 320px; gap: 28px; }
-        @media (max-width: 1000px) { .viz-wrap { grid-template-columns: 1fr; } }
-        .viz-card { overflow: hidden; }
-        .viz-svg { width: 100%; height: auto; display: block; aspect-ratio: 16/10; color: var(--fg); }
-        .viz-controls { display: flex; flex-direction: column; gap: 16px; }
-        .panel { padding: 22px; }
+        .viz-wrap { margin-top: 60px; display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: stretch; }
+        @media (max-width: 1000px) { .viz-wrap { grid-template-columns: 1fr; } .viz-controls { display: grid; grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .viz-controls { grid-template-columns: 1fr; } }
+        .viz-card { overflow: hidden; position: relative; padding: 24px; display: flex; align-items: center; justify-content: center; }
+        .viz-card::before { content: ""; position: absolute; inset: 0;
+          background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 5%, transparent), transparent 70%);
+          opacity: 0.5; pointer-events: none; animation: bg-spin 20s linear infinite; }
+        @keyframes bg-spin { to { transform: rotate(360deg); } }
+        .viz-svg { width: 100%; height: 100%; max-height: 480px; display: block; color: var(--fg); position: relative; z-index: 1; }
+        .op-dot { animation: pulse-dot 1.5s infinite; }
+        @keyframes pulse-dot { 0%, 100% { stroke-width: 2px; stroke-opacity: 1; } 50% { stroke-width: 8px; stroke-opacity: 0.4; } }
+        .viz-controls { display: flex; flex-direction: column; gap: 14px; }
+        .panel { padding: 22px; transition: border-color .3s; }
+        .panel:hover { border-color: color-mix(in oklab, var(--accent) 40%, var(--card-bd)); }
         .panel h4 { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--fg-soft); margin: 0 0 14px; }
-        .toggle-group { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--rule-c); border-radius: 4px; overflow: hidden; }
-        .toggle-group button { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
-          padding: 10px 12px; background: transparent; color: var(--fg-soft); border: 0; cursor: pointer; transition: all .25s; }
-        .toggle-group button + button { border-left: 1px solid var(--rule-c); }
-        .toggle-group button.active { background: var(--accent); color: #061a14; font-weight: 600; }
+        
+        /* Custom Glowing Sliders */
+        .slider { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: color-mix(in oklab, var(--rule-c) 80%, transparent); border-radius: 3px; outline: none; transition: background 0.3s; }
+        .slider:hover { background: color-mix(in oklab, var(--rule-c) 100%, transparent); }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 12px var(--accent); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+        .slider::-moz-range-thumb { width: 18px; height: 18px; border: none; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 12px var(--accent); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slider::-moz-range-thumb:hover { transform: scale(1.3); }
+        
         .slider-row { display: flex; align-items: center; gap: 12px; }
         .val { font-family: var(--mono); font-size: 12px; color: var(--fg); min-width: 80px; text-align: right; }
         .readout { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; font-family: var(--mono); font-size: 12px; }

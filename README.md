@@ -1,128 +1,131 @@
 # Darshan Jogani — Academic Portfolio
 
-Hi-fi React + Three.js portfolio for **Darshan Jogani**, doctoral researcher at the German Aerospace Center (DLR Stuttgart).
+Hi-fi React + Three.js portfolio for Darshan Jogani — Doctoral Researcher, DLR Stuttgart.
 
-> Alkaline water electrolysis · Power-to-X · Techno-Economic Analysis · Model Predictive Control
+This repository contains a polished personal portfolio built with Vite, React and Three.js. It includes interactive visualizations, a live 3D hero, code snippets, publications, talks, and a contact form.
 
----
+Why this repo exists
 
-## What's inside
+- Showcase research and code (AEL modelling, MPC demos, TEA calculations)
+- Provide a compact, editable portfolio scaffold for academic CVs and project pages
+
+Quick tree (high-level)
 
 ```
-darshan-portfolio/
-├── .github/workflows/deploy.yml   ← GitHub Pages auto-deploy
-├── public/
-│   ├── favicon.svg
-│   └── (drop Darshan-Jogani-CV.pdf here)
+portfolio/
+├── public/                 # static public assets (favicon, CV PDF)
 ├── src/
-│   ├── main.jsx                   ← Vite entry
-│   ├── App.jsx                    ← section composition
-│   ├── styles/
-│   │   ├── tokens.css             ← colors, fonts, spacing — edit here for theme
-│   │   └── globals.css            ← layout, components, utilities
-│   ├── data/                      ← editable content
-│   │   ├── publications.js        ← papers + abstracts + BibTeX
-│   │   ├── talks.js               ← timeline of conferences/seminars
-│   │   └── skills.js              ← skills + research pillars
-│   ├── lib/                       ← models & utilities
-│   │   ├── electrolyzer-model.js  ← Butler-Volmer / polarization math
-│   │   ├── mpc-model.js           ← receding-horizon controller
-│   │   ├── tea-model.js           ← LCOH waterfall calc
-│   │   └── theme.js               ← theme + tweaks context
-│   ├── components/                ← chrome (nav, footer, panels…)
-│   └── sections/                  ← one file per scrollable section
-│       ├── Hero.jsx               ← 3D water molecule + bubbles
-│       ├── About.jsx              ← bio + animated stats + skills
-│       ├── Research.jsx           ← 3 pillars + floating equation cards
-│       ├── ElectrolyzerModel.jsx  ← 3D cell-stack cutaway with hotspots
-│       ├── PolarizationCurve.jsx  ← interactive j–U curve
-│       ├── MPCDemo.jsx            ← live MPC with retunable Q/R/N
-│       ├── TEA.jsx                ← LCOH waterfall + sliders
-│       ├── PowerToX.jsx           ← animated process flowsheet
-│       ├── Renewables.jsx         ← 24-h renewable→AWE simulation
-│       ├── CodeShowcase.jsx       ← Python / MATLAB snippets
-│       ├── Publications.jsx       ← search + filter + BibTeX export
-│       ├── Talks.jsx              ← speaking timeline
-│       └── Contact.jsx            ← form + socials
-├── index.html                     ← Vite HTML
-├── preview.html                   ← in-browser preview (no build step)
-├── vite.config.js
+│   ├── main.jsx            # app entry
+│   ├── App.jsx             # section composition & layout
+│   ├── styles/             # tokens.css (theme), globals.css (layout)
+│   ├── lib/                # models + theme context
+│   ├── components/         # UI chrome: Nav, Footer, Reveal, ThemeToggle
+│   └── sections/           # page sections (Hero, About, CodeShowcase, Contact...)
+├── index.html
 ├── package.json
-├── README.md                      ← this file
-└── DEPLOY.md                      ← deployment cheat-sheet
+├── vite.config.js
+└── README.md
 ```
 
----
+Table of contents
 
-## Two ways to run
+- Getting started (dev)
+- Building & deployment
+- Theme & tweaks (how theming works)
+- Troubleshooting (common issues & fixes)
+- Development notes (how to edit sections / change fonts)
+- Contributing & license
 
-### 1. Vite dev server (recommended for editing)
+Getting started (recommended)
 
-```bash
+Prerequisites
+
+- Node.js (16+) and npm (or pnpm/yarn)
+
+Install and run dev server (PowerShell):
+
+```powershell
 npm install
-npm run dev          # → http://localhost:5173
+npm run dev
+# open http://localhost:5173
 ```
 
-Build for production:
+Build & preview production bundle
 
-```bash
-npm run build        # outputs to /dist
-npm run preview      # local sanity check of the built bundle
+```powershell
+npm run build
+npm run preview
+# or serve the dist folder with a static server
 ```
 
-### 2. Zero-build preview
 
-`preview.html` loads the **same** `src/` files via an `<importmap>` + Babel-standalone. Useful if you want to demo without a Node.js install.
+Editing the site
 
-> Caveat: needs to be served (not opened as `file://`). The simplest:
-> ```bash
-> npx serve .
-> # or
-> python3 -m http.server 8080
-> ```
+- Colors / tokens: `src/styles/tokens.css` — where CSS custom properties live (accent, bg, fg, spacing)
+- Global CSS: `src/styles/globals.css`
+- Sections: `src/sections/*.jsx` — each scrollable section lives in its own file. To add a section, create the file and import it in `src/App.jsx`.
+- Theme handling: `src/lib/theme.jsx` (context + localStorage persistence)
 
----
+Deployment
 
-## Editing common things
+1. GitHub Actions (auto) — The repository contains a GitHub Actions workflow that builds the site and publishes to GitHub Pages when you push to `main`. Check `.github/workflows/deploy.yml` for details.
+2. Manual (one-off)
 
-| You want to… | Edit |
-|---|---|
-| Change brand colors | `src/styles/tokens.css` (`--teal`, `--indigo`) |
-| Add a publication | `src/data/publications.js` (auto-appears in list & search) |
-| Add a talk | `src/data/talks.js` |
-| Add a skill chip | `src/data/skills.js` |
-| Tune the polarization model | `src/lib/electrolyzer-model.js` |
-| Adjust LCOH defaults | `src/lib/tea-model.js` |
-| Add a new section | New file in `src/sections/`, import into `src/App.jsx` |
-| Replace placeholder CV | Drop `Darshan-Jogani-CV.pdf` into `public/` |
+```powershell
+npm run build
+# Preview locally
+npm run preview
+# Copy / upload the generated `dist/` to your chosen host (Netlify, Surge, S3, GitHub Pages)
+```
 
----
+If you prefer GitHub Pages but not Actions, a quick manual publish is to push the `dist/` tree to the `gh-pages` branch (tools such as `gh-pages` can automate this).
 
-## Live tweaks (in the running site)
+Theme & runtime tweaks (important)
 
-The toolbar Tweaks button opens a panel that lets visitors recolor the site live (accent, accent-2, dark background, plus 5 presets). The state persists in `localStorage`. There's also a one-click theme toggle (dark/light).
+- The app uses CSS custom properties (tokens) to support dark/light themes and live tweaks. The `ThemeToggle` and `TweaksPanel` write to `document.documentElement` and persist preferences in `localStorage`.
+- If you see theme values not updating when toggling (e.g., sections appear stuck in dark mode until a full refresh), that usually means inline CSS variables set by JS are overriding stylesheet declarations. Ensure any code that sets `root.style.setProperty('--var', ...)` cleans up or sets values symmetrically when switching themes (see `src/lib/theme.jsx`).
+- For three.js materials that depend on CSS variables, some components use MutationObservers to re-sync colors when the theme changes. If you add custom scenes, either re-read CSS variables on theme change or observe `document.documentElement` for style/data-theme changes.
 
----
+Troubleshooting (common issues)
 
-## Deployment
+- Text barely visible after theme toggle: check for ad-hoc `!important` overrides in section styles (revert them) and prefer fixing token values in `tokens.css` or setting/removing inline variables symmetrically in `theme.jsx`.
+- Vite deprecation warnings: If you see warnings about `esbuild` and `rollupOptions`, consider switching to `@vitejs/plugin-react-oxc` as recommended by Vite.
+- 3D not updating colors: ensure materials read updated colors (MutationObserver or re-create materials when theme changes).
 
-See **`DEPLOY.md`** for full instructions. Two paths:
+Design & accessibility notes
 
-- **Auto** — push to `main`; the GitHub Actions workflow builds and publishes to Pages.
-- **Manual** — `npm run build` and push the `dist/` folder yourself.
+- Colors, spacing and typographic scale are defined in `tokens.css` — keep contrast checks in mind when customizing to maintain WCAG compliance.
+- Headings and interactive controls use semantic HTML to preserve keyboard navigation and screen reader friendliness.
 
----
+Developer tips
 
-## Tech
+- Quick grep to find places that write CSS variables:
 
-- **Vite 5** + **React 18** — build & framework
-- **@react-three/fiber + drei + three.js** — 3D scenes (water molecule, cell stack)
-- **GSAP + ScrollTrigger** — entrance + scroll-linked animation
-- **KaTeX** — equation rendering
-- **No CSS framework** — hand-rolled tokens for full editorial control
+```powershell
+Select-String -Path src\**\*.jsx -Pattern "setProperty\('--" -SimpleMatch
+```
 
----
+- To change the code font used in `CodeShowcase`, edit `src/sections/CodeShowcase.jsx` — a ligature-friendly font (JetBrains Mono, Cascadia Code, Fira Code) is already included as an option.
 
-## Credits
+Contributing
 
-Designed and engineered for **Darshan Jogani** — doctoral researcher, DLR Institute of Engineering Thermodynamics, Stuttgart. Crafted with care.
+- Small fixes and content updates are welcome. For code changes, open a PR against `main` with a short description. For big features, open an issue first to discuss the design.
+
+License
+
+- This project is licensed under the BSD 3-Clause "New" ("Revised") License. See the `LICENSE` file in the repository root for full terms.
+
+Contact
+
+- The contact section on the live site provides an email and socials. For repo questions, you can open an issue.
+
+Extras I added while auditing the project
+
+- A dynamic weekday/holiday status badge was added to `src/sections/Contact.jsx` (shows green "Responsive" on weekdays, red "Away / Public holiday" otherwise).
+- A small fix was suggested for `src/lib/theme.jsx` to avoid leaving inline CSS custom properties set only for dark theme (this can cause theme toggles to look broken until a refresh). If you'd like, I can apply that patch for you.
+
+Enjoy — and if you'd like I can also:
+
+- Add a tiny CI test that builds the site on PRs
+- Add an automated holiday calendar lookup (so the contact badge uses an authoritative list)
+- Convert `tokens.css` into a light/dark JSON and generate CSS variables automatically

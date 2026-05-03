@@ -213,9 +213,12 @@ export default function CodeShowcase() {
           font-family: var(--mono); font-size: 11px; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all .2s; }
         .copy-btn:hover { background: var(--code-bg); border-color: var(--code-tab-active-fg); color: var(--code-tab-active-fg); }
         
-        .code-scroll { overflow-x: auto; max-height: 520px; }
-        .code-block { margin: 0; padding: 24px 0; font-size: 13.5px; line-height: 1.6; color: var(--code-fg);
-          animation: fade-in 0.4s ease-out forwards; }
+        // .code-scroll { overflow-x: auto; max-height: 520px; }
+        .code-scroll { overflow-x: auto; max-height: 520px; -webkit-overflow-scrolling: touch; }
+        // .code-block { margin: 0; padding: 24px 0; font-size: 13.5px; line-height: 1.6; color: var(--code-fg);
+        //   animation: fade-in 0.4s ease-out forwards; }
+        .code-block { margin: 0; padding: 24px 0; font-size: clamp(11px, 3vw, 13.5px); line-height: 1.6; color: var(--code-fg);
+           animation: fade-in 0.4s ease-out forwards; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         
         .code-block code { counter-reset: line; font-family: 'JetBrains Mono', 'Fira Code', var(--mono), monospace;

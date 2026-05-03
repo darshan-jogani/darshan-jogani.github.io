@@ -38,7 +38,7 @@ export default function Nav({ onCV, onTweaks }) {
       <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
         <a className="brand" href="#top" onClick={(e) => handleClick(e, '#top')}>
           <span className="brand-mark">DJ</span>
-          <span>Darshan Jogani</span>
+          <span className="brand-text">Darshan Jogani</span>
         </a>
         <ul className="nav-links">
           {links.slice(0, 6).map(([href, label]) => (
@@ -67,10 +67,18 @@ export default function Nav({ onCV, onTweaks }) {
         </div>
       </nav>
       <aside className={`drawer ${open ? 'open' : ''}`}>
-        <button className="btn drawer-close" onClick={() => setOpen(false)}>Close</button>
-        {links.map(([href, label, num]) => (
-          <a key={href} href={href} onClick={(e) => handleClick(e, href)}><span>{num}</span>{label}</a>
-        ))}
+        <div className="drawer-header">
+          <button className="btn btn-primary" onClick={onCV}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+            CV
+          </button>
+          <button className="btn drawer-close" onClick={() => setOpen(false)}>Close</button>
+        </div>
+        <div className="drawer-links">
+          {links.map(([href, label, num]) => (
+            <a key={href} href={href} onClick={(e) => handleClick(e, href)}><span>{num}</span>{label}</a>
+          ))}
+        </div>
       </aside>
       <style>{`
         .nav { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 80;
@@ -78,23 +86,26 @@ export default function Nav({ onCV, onTweaks }) {
           display: flex; align-items: center; justify-content: space-between;
           padding: 18px 28px; transition: all .3s; border: 1px solid transparent;
           color: var(--fg); }
-        .nav.scrolled { background: color-mix(in oklab, var(--bg) 78%, transparent);
-          backdrop-filter: saturate(140%) blur(16px); -webkit-backdrop-filter: saturate(140%) blur(16px);
-          border-color: var(--rule-c); padding-top: 14px; padding-bottom: 14px; box-shadow: 0 12px 32px -12px rgba(0,0,0,0.3); }
+        .nav.scrolled { background: color-mix(in oklab, var(--bg) 75%, transparent);
+          backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+          border-color: color-mix(in oklab, var(--rule-c) 60%, transparent); padding-top: 14px; padding-bottom: 14px; 
+          box-shadow: 0 16px 40px -12px rgba(0,0,0,0.5), inset 0 1px 0 color-mix(in oklab, var(--fg) 10%, transparent); }
         .brand { display: inline-flex; align-items: center; gap: 12px;
           font-family: var(--serif); font-size: 18px; letter-spacing: .5px; cursor: pointer; }
+        .brand:hover .brand-mark { transform: scale(1.1) rotate(10deg); box-shadow: 0 6px 20px -4px var(--accent); }
         .brand-mark { width: 34px; height: 34px; border-radius: 50%;
           display: inline-flex; align-items: center; justify-content: center;
           background: linear-gradient(135deg, var(--accent), var(--accent-2));
-          color: #061a14; font-family: var(--serif); font-weight: 700;
-          font-size: 14px; box-shadow: 0 4px 18px -6px var(--accent); }
+          color: #061a14; font-family: var(--serif); font-weight: 700; font-size: 14px;
+          box-shadow: 0 4px 18px -6px var(--accent); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease; }
         .nav-links { list-style: none; margin: 0; padding: 0;
           display: flex; gap: 22px; align-items: center;
           font-size: 13px; color: var(--fg-soft); }
         .nav-links a, .nav-links .more > span {
           position: relative; padding: 4px 0; cursor: pointer; transition: color .2s; }
-        .nav-links a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -2px;
-          height: 1px; background: var(--accent); transition: right .35s ease; }
+        .nav-links a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -4px;
+          height: 2px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent);
+          transition: right .3s ease; }
         .nav-links a:hover { color: var(--fg); }
         .nav-links a:hover::after { right: 0; }
         .nav-links .more { position: relative; }
@@ -123,21 +134,28 @@ export default function Nav({ onCV, onTweaks }) {
           .nav-actions .menu-btn { display: inline-flex; }
           .nav-actions .hide-mobile { display: none; }
         }
+        @media (max-width: 600px) {
+          .brand { gap: 8px; font-size: clamp(14px, 4vw, 18px); }
+          .brand-mark { width: 30px; height: 30px; font-size: 12px; }
+          .nav { padding: 10px 14px; width: calc(100% - 16px); }
+          .nav-actions { gap: 4px; }
+        }
         .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(86vw, 360px); z-index: 90;
           background: var(--bg-alt); border-left: 1px solid var(--rule-c);
           transform: translateX(100%); transition: transform .4s cubic-bezier(.7,0,.2,1);
-          padding: 80px 32px; display: flex; flex-direction: column; gap: 14px; }
+          padding: 24px 32px; display: flex; flex-direction: column; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .drawer-links { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
         .drawer.open { transform: translateX(0); }
         .drawer a { font-family: var(--serif); font-size: 22px; color: var(--fg); }
         .drawer a span { color: var(--accent); font-family: var(--mono); font-size: 11px; margin-right: 12px; }
-        .drawer-close { position: absolute; top: 22px; right: 22px; }
 
         /* Light Theme Overrides */
         html[data-theme="light"] .nav { color: #0f172a; }
         html[data-theme="light"] .nav.scrolled {
           background: rgba(255, 255, 255, 0.85);
           border-color: rgba(0, 0, 0, 0.08);
-          box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255,255,255,0.6);
         }
         html[data-theme="light"] .nav-links { color: #475569; }
         html[data-theme="light"] .nav-links a:hover { color: #0f172a; }

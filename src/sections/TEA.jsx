@@ -40,7 +40,12 @@ export default function TEA() {
                 <div className="bar-row" key={i.k}>
                   <span className="bar-label mono">{i.k}</span>
                   <div className="bar-track">
-                    <div className="bar-fill" style={{ width: (i.v / max * 100) + '%', background: i.c }} />
+                    <div className="bar-fill" style={{ 
+                      width: (i.v / max * 100) + '%', 
+                      background: `linear-gradient(90deg, color-mix(in oklab, ${i.c} 10%, transparent), ${i.c})`,
+                      borderRight: `2px solid color-mix(in oklab, ${i.c} 40%, #ffffff)`,
+                      boxShadow: `2px 0 16px -2px ${i.c}`
+                    }} />
                   </div>
                   <span className="bar-val mono">€ {i.v.toFixed(2)}</span>
                 </div>
@@ -86,19 +91,42 @@ export default function TEA() {
         .tea-chart { padding: 32px; }
         .tea-total { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--rule-c); }
         .small { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--fg-soft); }
-        .tea-total h3 { font-family: var(--serif); font-size: 64px; font-weight: 500; margin: 8px 0 0; line-height: 1; color: var(--fg); }
+        .tea-total h3 { font-family: var(--serif); font-size: clamp(40px, 8vw, 64px); font-weight: 500; margin: 8px 0 0; line-height: 1; color: var(--fg); }
         .tea-total .unit { font-size: .35em; color: var(--fg-soft); margin-left: 8px; font-family: var(--mono); }
         .bars { display: flex; flex-direction: column; gap: 12px; }
         .bar-row { display: grid; grid-template-columns: 110px 1fr 90px; gap: 16px; align-items: center; }
         .bar-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--fg-soft); }
-        .bar-track { height: 22px; background: color-mix(in oklab, var(--fg) 6%, transparent); border-radius: 4px; overflow: hidden; }
-        .bar-fill { height: 100%; transition: width .4s cubic-bezier(.7,0,.2,1); border-radius: 4px; }
+        .bar-track { height: 22px; background: color-mix(in oklab, var(--fg) 6%, transparent); border-radius: 4px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .bar-fill { height: 100%; transition: width .5s cubic-bezier(.34, 1.56, .64, 1); border-radius: 4px; position: relative; }
         .bar-val { font-size: 12px; color: var(--fg); text-align: right; }
         .tea-controls { display: flex; flex-direction: column; gap: 14px; }
-        .panel { padding: 22px; }
+        .panel { padding: 22px; transition: border-color .3s; }
+        .panel:hover { border-color: color-mix(in oklab, var(--accent) 40%, var(--card-bd)); }
         .panel h4 { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--fg-soft); margin: 0 0 14px; }
         .slider-row { display: flex; align-items: center; gap: 12px; }
         .val { font-family: var(--mono); font-size: 12px; color: var(--fg); min-width: 60px; text-align: right; }
+
+        /* Custom Glowing Sliders */
+        .slider { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; background: color-mix(in oklab, var(--rule-c) 80%, transparent); border-radius: 3px; outline: none; transition: background 0.3s; }
+        .slider:hover { background: color-mix(in oklab, var(--rule-c) 100%, transparent); }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 12px var(--accent); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+        .slider::-moz-range-thumb { width: 18px; height: 18px; border: none; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 12px var(--accent); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slider::-moz-range-thumb:hover { transform: scale(1.3); }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+          .tea-chart { padding: 24px; }
+          .bar-row { 
+            grid-template-columns: 1fr auto; 
+            grid-template-areas: "label val" "track track"; 
+            gap: 8px; margin-bottom: 12px; 
+          }
+          .bar-label { grid-area: label; }
+          .bar-val { grid-area: val; }
+          .bar-track { grid-area: track; height: 14px; }
+          .panel { padding: 18px; }
+        }
       `}</style>
     </section>
   );
