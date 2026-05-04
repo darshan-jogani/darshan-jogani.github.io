@@ -18,26 +18,29 @@ const SOCIALS = [
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', topic: 'collaboration', msg: '' });
   const [sent, setSent] = useState(false);
-  // Determine if today is a public holiday (simple fixed-date list for Germany)
-  const isPublicHoliday = (d) => {
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const mmdd = `${month}-${day}`;
-    // Common fixed-date public holidays in Germany (not exhaustive)
-    const fixedHolidays = ['01-01', '05-01', '10-03', '12-25', '12-26'];
-    return fixedHolidays.includes(mmdd);
-  };
 
-  const now = new Date();
-  const weekday = now.getDay(); // 0 = Sun, 6 = Sat
-  const holiday = isPublicHoliday(now);
-  const isWeekday = weekday >= 1 && weekday <= 5;
+  // Get current time in Stuttgart, Germany regardless of visitor's location
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Berlin',
+    month: '2-digit', day: '2-digit', hour: 'numeric', hour12: false, weekday: 'short'
+  });
+  const parts = formatter.formatToParts(new Date());
+  const getPart = (type) => parts.find(p => p.type === type)?.value;
+
+  const month = getPart('month');
+  const day = getPart('day');
+  const hour = parseInt(getPart('hour'), 10);
+  const weekdayStr = getPart('weekday');
+
+  const isHoliday = ['01-01', '05-01', '10-03', '12-25', '12-26'].includes(`${month}-${day}`);
+  const isWeekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(weekdayStr);
+  const isWorkingHour = hour >= 9 && hour < 17; // 09:00 to 16:59 CET/CEST
+
   let statusText = 'Responsive';
   let statusClass = 'open';
-  if (holiday) {
-    statusText = 'Public holiday';
-    statusClass = 'closed';
-  } else if (!isWeekday) {
+
+  // If outside of Mon-Fri, 9am-5pm German time, or on a holiday, set to Away.
+  if (isHoliday || !isWeekday || !isWorkingHour) {
     statusText = 'Away';
     statusClass = 'closed';
   }

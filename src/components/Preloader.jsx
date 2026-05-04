@@ -46,9 +46,10 @@ export default function Preloader() {
   return (
     <>
       <div id="preloader" ref={rootRef} className={`phase-${phase}`}>
-        <div className="water-ripple r1"></div>
-        <div className="water-ripple r2"></div>
-        <div className="water-ripple r3"></div>
+        <div className="quantum-flash"></div>
+        <div className="orbital-wrap w1"><div className="orbital-ring"></div></div>
+        <div className="orbital-wrap w2"><div className="orbital-ring"></div></div>
+        <div className="orbital-wrap w3"><div className="orbital-ring"></div></div>
         <div className="pl-content" ref={contentRef} style={{ '--p-bar': '0%', '--p-mask': '0%', '--flare-o': '0' }}>
           <div className="pl-brand" data-text="Darshan Jogani">Darshan Jogani</div>
           <div className="pl-bottom">
@@ -72,13 +73,13 @@ export default function Preloader() {
         
         .pl-content {
           display: flex; flex-direction: column; align-items: center; gap: 40px;
-          transition: transform 1.5s cubic-bezier(0.7, 0, 0.2, 1), opacity 1.2s ease, filter 1.5s ease;
+          transition: transform 1.5s cubic-bezier(0.5, 0, 0.2, 1), opacity 1.2s ease, filter 1.5s ease;
           will-change: transform, opacity, filter;
         }
         .phase-exiting .pl-content {
-          transform: scale(2.5);
+          transform: scale(4) translateZ(100px);
           opacity: 0;
-          filter: blur(12px);
+          filter: blur(8px);
         }
         .pl-brand {
           font-family: var(--serif); font-size: clamp(36px, 10vw, 84px); font-weight: 600;
@@ -146,24 +147,43 @@ export default function Preloader() {
           color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
         }
         
-        /* Water Ripples */
-        .water-ripple {
-          position: absolute; left: 50%; top: 50%;
-          width: 200px; height: 200px; margin-left: -100px; margin-top: -100px;
-          border-radius: 50%;
-          border: 2px solid var(--accent);
-          box-shadow: inset 0 0 20px var(--accent), 0 0 20px var(--accent);
-          opacity: 0; transform: scale(0);
-          pointer-events: none;
-          will-change: transform, opacity;
+        /* Atomic Warp Effects */
+        .quantum-flash {
+          position: absolute; inset: -50%;
+          background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 60%, transparent) 0%, transparent 60%);
+          opacity: 0; pointer-events: none; z-index: -1;
         }
-        .phase-exiting .water-ripple.r1 { animation: ripple-wave 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        .phase-exiting .water-ripple.r2 { animation: ripple-wave 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards; }
-        .phase-exiting .water-ripple.r3 { animation: ripple-wave 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s forwards; }
+        .phase-exiting .quantum-flash {
+          animation: flash-bang 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes flash-bang {
+          0% { opacity: 0; transform: scale(0.5); }
+          20% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(2.5); }
+        }
 
-        @keyframes ripple-wave {
-          0% { transform: scale(0.1); opacity: 1; border-width: 8px; }
-          100% { transform: scale(25); opacity: 0; border-width: 1px; }
+        .orbital-wrap {
+          position: absolute; left: 50%; top: 50%;
+          width: 240px; height: 240px; margin-left: -120px; margin-top: -120px;
+          transform-style: preserve-3d; perspective: 800px; pointer-events: none;
+        }
+        .w1 { transform: rotateX(65deg) rotateY(35deg); }
+        .w2 { transform: rotateX(55deg) rotateY(-45deg); }
+        .w3 { transform: rotateX(80deg) rotateY(15deg); }
+
+        .orbital-ring {
+          width: 100%; height: 100%; border-radius: 50%;
+          border: 1px solid var(--accent);
+          box-shadow: 0 0 10px var(--accent), inset 0 0 10px var(--accent);
+          opacity: 0; transform: scale(0);
+        }
+        .phase-exiting .w1 .orbital-ring { animation: q-expand 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .phase-exiting .w2 .orbital-ring { animation: q-expand 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards; }
+        .phase-exiting .w3 .orbital-ring { animation: q-expand 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards; }
+
+        @keyframes q-expand {
+          0% { transform: scale(0.1) rotateZ(0deg); opacity: 1; }
+          100% { transform: scale(20) rotateZ(90deg); opacity: 0; }
         }
 
         @media (max-width: 600px) { 
