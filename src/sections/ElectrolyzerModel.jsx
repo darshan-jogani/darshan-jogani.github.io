@@ -160,13 +160,8 @@ const HOTSPOT_INFO = [
 export default function ElectrolyzerModel() {
   const [hover, setHover] = useState(null);
   return (
-    <section id="electrolyzer" className="dark">
-      <div className="container">
-        <Reveal clip className="section-label"><span className="num">03</span><span>Alkaline Electrolyzer</span></Reveal>
-        <Reveal clip as="h2" className="section-title">Inside the <em>cell stack</em>.</Reveal>
-        <Reveal as="p" className="section-intro">An alkaline electrolyzer is a sandwich of repeat units. Hover any plate in the 3D model to see what it does. Drag to orbit — scroll to zoom.</Reveal>
-
-        <div className="elec-grid">
+    <>
+      <div className="elec-grid">
           <Reveal className="elec-canvas">
             <Canvas camera={{ position: [6, 3, 6], fov: 40 }} dpr={[1, 2]}>
               <ambientLight intensity={0.5} />
@@ -191,13 +186,23 @@ export default function ElectrolyzerModel() {
             </div>
           </Reveal>
         </div>
-      </div>
 
       <style>{`
-        .elec-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; margin-top: 60px; }
+        .elec-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; margin-top: 0; }
         @media (max-width: 900px) { .elec-grid { grid-template-columns: 1fr; } }
-        .elec-canvas { aspect-ratio: 4/3; border: 1px solid var(--card-bd); border-radius: var(--radius); overflow: hidden;
-          background: radial-gradient(800px 400px at 50% 40%, #15224b, var(--bg)); }
+        .elec-canvas { 
+          aspect-ratio: 4/3; border-radius: var(--radius); overflow: hidden;
+          background: radial-gradient(800px 400px at 50% 40%, color-mix(in oklab, var(--accent) 15%, #15224b), var(--bg)); 
+          border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+          box-shadow: inset 0 0 20px color-mix(in oklab, var(--accent) 5%, transparent),
+                      0 12px 40px -12px color-mix(in oklab, var(--accent) 15%, transparent);
+          transition: box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+        .elec-canvas:hover {
+          border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+          box-shadow: inset 0 0 30px color-mix(in oklab, var(--accent) 10%, transparent),
+                      0 16px 48px -12px color-mix(in oklab, var(--accent) 25%, transparent);
+        }
         .elec-info { padding: 28px; display: flex; flex-direction: column; gap: 14px; }
         .ei-head { display: flex; justify-content: space-between; }
         .small { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--fg-soft); }
@@ -207,6 +212,6 @@ export default function ElectrolyzerModel() {
         .ei-stats .k { font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--fg-soft); display: block; margin-bottom: 2px; }
         .ei-stats .v { font-family: var(--serif); font-size: 18px; color: var(--fg); }
       `}</style>
-    </section>
+    </>
   );
 }

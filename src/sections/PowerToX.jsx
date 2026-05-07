@@ -26,21 +26,16 @@ export default function PowerToX() {
   const [hover, setHover] = useState(null);
   const W = 1040, H = 500;
   return (
-    <section id="power-to-x" className="dark">
-      <div className="container">
-        <Reveal clip className="section-label"><span className="num">07</span><span>Power-to-X</span></Reveal>
-        <Reveal clip as="h2" className="section-title">From <em>electrons</em> to <em>molecules</em>.</Reveal>
-        <Reveal as="p" className="section-intro">A simplified flowsheet for an industrial Power-to-X plant. Renewable electrons drive the electrolyzer; the resulting hydrogen feeds three downstream synthesis routes. Hover any node for details.</Reveal>
-
-        <Reveal className="card flow-card">
+    <>
+      <Reveal className="card flow-card">
           <div className="flow-scroll">
             <svg viewBox={`0 0 ${W} ${H}`} className="flow-svg" preserveAspectRatio="xMidYMid meet">
             <defs>
-              <linearGradient id="edge-grad" x1="0" y1="0" x2="1" y2="0">
+              <linearGradient id="ptx-edge-grad" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.2"/>
                 <stop offset="100%" stopColor="var(--indigo)" stopOpacity="0.8"/>
               </linearGradient>
-              <linearGradient id="glass-grad" x1="0" x2="1" y1="0" y2="0">
+              <linearGradient id="ptx-glass-grad" x1="0" x2="1" y1="0" y2="0">
                 <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.4"/>
                 <stop offset="12%" stopColor="#ffffff" stopOpacity="0.1"/>
                 <stop offset="30%" stopColor="#ffffff" stopOpacity="0.0"/>
@@ -48,21 +43,21 @@ export default function PowerToX() {
                 <stop offset="88%" stopColor="var(--indigo)" stopOpacity="0.2"/>
                 <stop offset="100%" stopColor="var(--indigo)" stopOpacity="0.5"/>
               </linearGradient>
-              <linearGradient id="glass-hl-left" x1="0" x2="1" y1="0" y2="0">
+              <linearGradient id="ptx-glass-hl-left" x1="0" x2="1" y1="0" y2="0">
                 <stop offset="0%" stopColor="#ffffff" stopOpacity="0.0"/>
                 <stop offset="5%" stopColor="#ffffff" stopOpacity="0.6"/>
                 <stop offset="15%" stopColor="#ffffff" stopOpacity="0.0"/>
               </linearGradient>
-              <linearGradient id="glass-hl-right" x1="0" x2="1" y1="0" y2="0">
+              <linearGradient id="ptx-glass-hl-right" x1="0" x2="1" y1="0" y2="0">
                 <stop offset="85%" stopColor="#ffffff" stopOpacity="0.0"/>
                 <stop offset="95%" stopColor="#ffffff" stopOpacity="0.4"/>
                 <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0"/>
               </linearGradient>
-              <filter id="flow-glow">
+              <filter id="ptx-flow-glow">
                 <feGaussianBlur stdDeviation="4" result="b"/>
                 <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
               </filter>
-              <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <marker id="ptx-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
                 <path d="M0 0 L10 5 L0 10 z" fill="var(--fg)" opacity="0.8"/>
               </marker>
             </defs>
@@ -76,11 +71,11 @@ export default function PowerToX() {
               const d = `M${startX} ${startY} C ${mx} ${startY}, ${mx} ${endY}, ${endX} ${endY}`;
               return (
                 <g key={i}>
-                  <path d={d} stroke="var(--fg-soft)" strokeWidth="2.5" fill="none" opacity="0.65" markerEnd="url(#arr)"/>
+                  <path d={d} stroke="var(--fg-soft)" strokeWidth="2.5" fill="none" opacity="0.65" markerEnd="url(#ptx-arr)"/>
                   <g>
                     <animateMotion dur={`${3 + (i % 2)}s`} repeatCount="indefinite" path={d} begin={`${i * -0.5}s`}/>
                     <circle r="3" fill="#ffffff" />
-                    <circle r="8" fill="var(--accent)" opacity="0.4" filter="url(#flow-glow)" />
+                    <circle r="8" fill="var(--accent)" opacity="0.4" filter="url(#ptx-flow-glow)" />
                   </g>
                 </g>
               );
@@ -89,7 +84,7 @@ export default function PowerToX() {
               if (n.id === 'awe') {
                 return (
                   <g key={n.id} transform={`translate(${n.x}, ${n.y})`} onMouseEnter={() => setHover(n.id)} onMouseLeave={() => setHover(null)}>
-                    <ellipse cx="0" cy="65" rx="70" ry="20" fill="url(#edge-grad)" opacity={hover === n.id ? 0.7 : 0.3} filter="url(#flow-glow)" style={{ transition: 'all 0.3s ease' }} pointerEvents="none"/>
+                    <ellipse cx="0" cy="65" rx="70" ry="20" fill="url(#ptx-edge-grad)" opacity={hover === n.id ? 0.7 : 0.3} filter="url(#ptx-flow-glow)" style={{ transition: 'all 0.3s ease' }} pointerEvents="none"/>
                     <ellipse cx="0" cy="65" rx="70" ry="20" fill="none" stroke="var(--accent)" strokeWidth="1" opacity="0.5" pointerEvents="none"/>
                     <ellipse cx="0" cy="65" rx="60" ry="15" fill="none" stroke="var(--indigo)" strokeWidth="1" opacity="0.3" pointerEvents="none"/>
                     
@@ -108,10 +103,10 @@ export default function PowerToX() {
                     </foreignObject>
                     
                     <g pointerEvents="none">
-                      <path d="M -70 -75 L -70 65 A 70 20 0 0 0 70 65 L 70 -75 A 70 20 0 0 0 -70 -75 Z" fill="url(#glass-grad)" opacity="0.85" />
-                      <path d="M -70 -75 L -70 65 A 70 20 0 0 0 70 65 L 70 -75 A 70 20 0 0 0 -70 -75 Z" fill="url(#glass-hl-left)" />
-                      <path d="M -70 -75 L -70 65 A 70 20 0 0 0 70 65 L 70 -75 A 70 20 0 0 0 -70 -75 Z" fill="url(#glass-hl-right)" />
-                      <ellipse cx="0" cy="-75" rx="70" ry="20" fill="url(#glass-grad)" opacity="0.9" />
+                      <path d="M -70 -75 L -70 65 A 70 20 0 0 0 70 65 L 70 -75 A 70 20 0 0 0 -70 -75 Z" fill="url(#ptx-glass-grad)" opacity="0.85" />
+                      <path d="M -70 -75 L -70 65 A 70 20 0 0 0 70 65 L 70 -75 A 70 20 0 0 0 -70 -75 Z" fill="url(#ptx-glass-hl-left)" />
+                      <path d="M -70 -75 L -70 65 A 70 20 0 0 0 70 65 L 70 -75 A 70 20 0 0 0 -70 -75 Z" fill="url(#ptx-glass-hl-right)" />
+                      <ellipse cx="0" cy="-75" rx="70" ry="20" fill="url(#ptx-glass-grad)" opacity="0.9" />
                       <ellipse cx="0" cy="-75" rx="70" ry="20" fill="none" stroke="#ffffff" strokeWidth="2" opacity="0.6"/>
                       <ellipse cx="0" cy="-25" rx="70" ry="18" fill="none" stroke="#ffffff" strokeWidth="1.5" opacity="0.15" />
                       <ellipse cx="0" cy="20" rx="70" ry="18" fill="none" stroke="#ffffff" strokeWidth="1.5" opacity="0.15" />
@@ -131,7 +126,7 @@ export default function PowerToX() {
                   stroke={hover === n.id ? 'var(--accent)' : 'var(--card-bd)'}
                   strokeWidth="1.5"
                   style={{ transition: 'all 0.3s ease' }}
-                  filter={hover === n.id ? 'url(#flow-glow)' : 'none'}
+                  filter={hover === n.id ? 'url(#ptx-flow-glow)' : 'none'}
                   />
                   <path d={`M -70 -20 L -70 -26 A 6 6 0 0 1 -64 -32 L -50 -32`} stroke="var(--accent)" fill="none" strokeWidth="2" opacity="0.6" />
                   <path d={`M 70 20 L 70 26 A 6 6 0 0 1 64 32 L 50 32`} stroke="var(--indigo)" fill="none" strokeWidth="2" opacity="0.6" />
@@ -147,9 +142,21 @@ export default function PowerToX() {
             <span className="mono small accent">η<sub>system</sub> ≈ 62 % HHV · LCOH ≈ €4.20 / kg</span>
           </div>
         </Reveal>
-      </div>
       <style>{`
-        .flow-card { padding: 24px; margin-top: 60px; overflow: hidden; background: var(--card); border: 1px solid var(--card-bd); border-radius: var(--radius); }
+        .flow-card { 
+          padding: clamp(16px, 3vw, 24px); margin-top: 0; overflow: hidden; 
+          border-radius: var(--radius);
+          background: linear-gradient(180deg, color-mix(in oklab, var(--bg) 60%, transparent), var(--card));
+          border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+          box-shadow: inset 0 0 20px color-mix(in oklab, var(--accent) 5%, transparent),
+                      0 12px 40px -12px color-mix(in oklab, var(--accent) 15%, transparent);
+          transition: box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+        .flow-card:hover {
+          border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+          box-shadow: inset 0 0 30px color-mix(in oklab, var(--accent) 10%, transparent),
+                      0 16px 48px -12px color-mix(in oklab, var(--accent) 25%, transparent);
+        }
         .flow-scroll { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 16px; margin-bottom: -4px; }
         .flow-scroll::-webkit-scrollbar { height: 6px; }
         .flow-scroll::-webkit-scrollbar-track { background: color-mix(in oklab, var(--rule-c) 50%, transparent); border-radius: 3px; }
@@ -159,6 +166,6 @@ export default function PowerToX() {
         .small { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--fg-soft); }
         .accent { color: var(--accent); }
       `}</style>
-    </section>
+    </>
   );
 }

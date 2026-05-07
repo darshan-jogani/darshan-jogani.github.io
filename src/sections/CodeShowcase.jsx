@@ -130,14 +130,9 @@ export default function CodeShowcase() {
   };
 
   return (
-    <section id="code" className="dark">
+    <>
       <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-      <div className="container">
-        <Reveal clip className="section-label"><span className="num">09</span><span>Code</span></Reveal>
-        <Reveal clip as="h2" className="section-title">The <em>computational backbone</em>.</Reveal>
-        <Reveal as="p" className="section-intro">A taste of the actual code that drives the models above. Written for clarity over cleverness.</Reveal>
-
-        <Reveal className="code-window">
+      <Reveal className="code-window">
           <div className="code-header">
             <div className="mac-btns">
               <span className="mac-btn close"></span>
@@ -159,7 +154,6 @@ export default function CodeShowcase() {
             <pre className="code-block" key={tab}><code dangerouslySetInnerHTML={{ __html: highlight(s.code, s.lang) }}/></pre>
           </div>
         </Reveal>
-      </div>
       <style>{`
         .code-window { 
           --code-bg: #0d1117;
@@ -175,7 +169,7 @@ export default function CodeShowcase() {
           --code-str: #a5d6ff;
           --code-num: #79c0ff;
           --code-com: #8b949e;
-          margin-top: 60px; background: var(--code-bg); border: 1px solid var(--code-bd); border-radius: 12px;
+          margin-top: 0; background: var(--code-bg); border: 1px solid var(--code-bd); border-radius: 12px;
           box-shadow: 0 24px 48px -12px rgba(0,0,0,0.2), 0 0 0 1px color-mix(in oklab, var(--accent) 20%, transparent); overflow: hidden;
           display: flex; flex-direction: column; }
 
@@ -235,6 +229,6 @@ export default function CodeShowcase() {
         .code-block .num { color: var(--code-num); }
         .code-block .com { color: var(--code-com); font-style: italic; }
       `}</style>
-    </section>
+    </>
   );
 }

@@ -9,8 +9,12 @@ function WaterMolecule() {
   const oMat = useRef();
   const oCoreMat = useRef();
   const hMats = useRef([]);
+  const hCoreMats = useRef([]);
   const bondMats = useRef([]);
   const rings = useRef([]);
+  const ringMats = useRef([]);
+  const ringGlowMats = useRef([]);
+  const ringOuterGlowMats = useRef([]);
   const { viewport } = useThree();
   
   // Automatically scales down the 3D model gracefully on mobile devices
@@ -46,19 +50,67 @@ function WaterMolecule() {
       const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00d4aa';
       
+      // Dynamically lighten or darken the accent color for the rings
+      const baseAccent = new THREE.Color(accent);
+      const ringColor = isLight 
+        ? baseAccent.clone().lerp(new THREE.Color('#ffffff'), 0.5) // Softer pastel tone for light mode
+        : baseAccent.clone().lerp(new THREE.Color('#ffffff'), 0.25); // Lighter neon pop for dark mode
+      
       oMat.current.color.set(isLight ? '#ffffff' : '#0a1020');
-      oCoreMat.current.color.set(accent);
-      oCoreMat.current.emissive.set(accent);
-      oCoreMat.current.emissiveIntensity = isLight ? 0.6 : 1.5;
+      oMat.current.transmission = isLight ? 0.95 : 1.0;
+      oMat.current.opacity = isLight ? 0.3 : 0.9;
+      oMat.current.needsUpdate = true;
+      
+      oCoreMat.current.color.copy(baseAccent);
+      oCoreMat.current.emissive.copy(baseAccent);
+      oCoreMat.current.emissiveIntensity = isLight ? 0.6 : 1.2;
 
       hMats.current.forEach(mat => {
-        if (mat) mat.color.set(isLight ? '#ffffff' : '#0a1020');
+        if (mat) {
+          mat.color.set(isLight ? '#ffffff' : '#0a1020');
+          mat.transmission = isLight ? 0.95 : 1.0;
+          mat.opacity = isLight ? 0.3 : 0.9;
+          mat.needsUpdate = true;
+        }
+      });
+      hCoreMats.current.forEach(mat => {
+        if (mat) {
+          const hCoreColor = isLight ? baseAccent.clone().lerp(new THREE.Color('#ffffff'), 0.6) : new THREE.Color('#ffffff');
+          mat.color.copy(hCoreColor);
+          mat.emissive.copy(hCoreColor);
+          mat.emissiveIntensity = isLight ? 0.6 : 1.0;
+        }
       });
       bondMats.current.forEach(mat => {
         if (mat) {
-          mat.color.set(accent);
-          mat.emissive.set(accent);
-          mat.emissiveIntensity = isLight ? 0.5 : 1.5;
+          mat.color.copy(baseAccent);
+          mat.emissive.copy(baseAccent);
+          mat.emissiveIntensity = isLight ? 0.3 : 1.0;
+        }
+      });
+      ringMats.current.forEach(mat => {
+        if (mat) {
+          mat.color.copy(ringColor);
+          mat.emissive.copy(ringColor);
+          mat.emissiveIntensity = isLight ? 0.6 : 1.5;
+          mat.blending = isLight ? THREE.NormalBlending : THREE.AdditiveBlending;
+          mat.needsUpdate = true;
+        }
+      });
+      ringGlowMats.current.forEach(mat => {
+        if (mat) {
+          mat.color.copy(ringColor);
+          mat.opacity = isLight ? 0.15 : 0.35;
+          mat.blending = isLight ? THREE.NormalBlending : THREE.AdditiveBlending;
+          mat.needsUpdate = true;
+        }
+      });
+      ringOuterGlowMats.current.forEach(mat => {
+        if (mat) {
+          mat.color.copy(ringColor);
+          mat.opacity = isLight ? 0.05 : 0.10;
+          mat.blending = isLight ? THREE.NormalBlending : THREE.AdditiveBlending;
+          mat.needsUpdate = true;
         }
       });
     };
@@ -101,7 +153,7 @@ function WaterMolecule() {
                 {/* Hydrogen Glowing Core */}
                 <mesh position={p}>
                   <sphereGeometry args={[0.2, 32, 32]} />
-                  <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={1} toneMapped={false} />
+                <meshStandardMaterial ref={el => hCoreMats.current[i] = el} toneMapped={false} />
                 </mesh>
                 {/* Bonding Tube */}
                 <mesh position={mid.toArray()} quaternion={q.toArray()}>
@@ -114,10 +166,23 @@ function WaterMolecule() {
 
         {/* Advanced Electron Orbitals */}
         {[2.8, 3.2, 3.6].map((radius, i) => (
-           <mesh key={i} ref={el => rings.current[i] = el}>
-              <torusGeometry args={[radius, 0.015, 64, 100]} />
-              <meshBasicMaterial color="#ffffff" transparent opacity={0.15} blending={THREE.AdditiveBlending} />
-           </mesh>
+           <group key={i} ref={el => rings.current[i] = el}>
+              {/* Thin Solid Wire Core */}
+              <mesh>
+                 <torusGeometry args={[radius, 0.004, 12, 100]} />
+                 <meshStandardMaterial ref={el => ringMats.current[i] = el} transparent opacity={0.9} toneMapped={false} />
+              </mesh>
+              {/* Inner Soft Fade */}
+              <mesh>
+                 <torusGeometry args={[radius, 0.012, 12, 100]} />
+                 <meshBasicMaterial ref={el => ringGlowMats.current[i] = el} transparent toneMapped={false} depthWrite={false} />
+              </mesh>
+              {/* Outer Ultra-Soft Fade */}
+              <mesh>
+                 <torusGeometry args={[radius, 0.028, 12, 100]} />
+                 <meshBasicMaterial ref={el => ringOuterGlowMats.current[i] = el} transparent toneMapped={false} depthWrite={false} />
+              </mesh>
+           </group>
         ))}
       </group>
   );
@@ -448,6 +513,12 @@ export default function Hero() {
         }
         [data-theme="light"] .eyebrow {
           text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+        }
+        [data-theme="light"] .cursor {
+          box-shadow: 0 0 0 2px rgba(255,255,255,0.8), 0 0 12px 2px color-mix(in oklab, var(--accent) 70%, transparent);
+        }
+        [data-theme="light"] .hero-inner {
+          background: radial-gradient(circle at center, rgba(255,255,255,0.5) 0%, transparent 65%);
         }
       `}</style>
     </header>

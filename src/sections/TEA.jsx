@@ -23,13 +23,8 @@ export default function TEA() {
   const total = b.total;
 
   return (
-    <section id="tea" className="alt">
-      <div className="container">
-        <Reveal clip className="section-label"><span className="num">06</span><span>Techno-Economic Analysis</span></Reveal>
-        <Reveal clip as="h2" className="section-title">What drives the <em>cost of green hydrogen</em>?</Reveal>
-        <Reveal as="p" className="section-intro">A simplified LCOH waterfall. Drag the inputs to see which lever matters most. (Illustrative — not policy advice.)</Reveal>
-
-        <div className="tea-grid">
+    <>
+      <div className="tea-grid">
           <Reveal className="card tea-chart">
             <div className="tea-total">
               <span className="mono small">LCOH</span>
@@ -84,11 +79,23 @@ export default function TEA() {
             </Reveal>
           </div>
         </div>
-      </div>
       <style>{`
-        .tea-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; margin-top: 60px; }
+        .tea-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; margin-top: 0; }
         @media (max-width: 1000px) { .tea-grid { grid-template-columns: 1fr; } }
-        .tea-chart { padding: 32px; }
+        .tea-chart { 
+          padding: clamp(24px, 4vw, 32px); 
+          border-radius: var(--radius);
+          background: linear-gradient(180deg, color-mix(in oklab, var(--bg) 60%, transparent), var(--card));
+          border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+          box-shadow: inset 0 0 20px color-mix(in oklab, var(--accent) 5%, transparent),
+                      0 12px 40px -12px color-mix(in oklab, var(--accent) 15%, transparent);
+          transition: box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+        .tea-chart:hover {
+          border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+          box-shadow: inset 0 0 30px color-mix(in oklab, var(--accent) 10%, transparent),
+                      0 16px 48px -12px color-mix(in oklab, var(--accent) 25%, transparent);
+        }
         .tea-total { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--rule-c); }
         .small { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--fg-soft); }
         .tea-total h3 { font-family: var(--serif); font-size: clamp(40px, 8vw, 64px); font-weight: 500; margin: 8px 0 0; line-height: 1; color: var(--fg); }
@@ -116,7 +123,6 @@ export default function TEA() {
 
         /* Mobile Responsiveness */
         @media (max-width: 600px) {
-          .tea-chart { padding: 24px; }
           .bar-row { 
             grid-template-columns: 1fr auto; 
             grid-template-areas: "label val" "track track"; 
@@ -128,6 +134,6 @@ export default function TEA() {
           .panel { padding: 18px; }
         }
       `}</style>
-    </section>
+    </>
   );
 }

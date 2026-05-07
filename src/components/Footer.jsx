@@ -16,7 +16,7 @@ export default function Footer() {
               <span className="mono small heading">Index</span>
               <a href="#about">About</a>
               <a href="#research">Research</a>
-              <a href="#polarization">Interactive Models</a>
+              <a href="/lab">Research Lab ↗</a>
               <a href="#contact">Contact</a>
             </div>
             <div className="nav-col">

@@ -52,36 +52,31 @@ export default function MPCDemo() {
   const spPath = useMemo(() => sim.sp.map((v, i) => (i ? 'L' : 'M') + xs(i) + ' ' + ys(v)).join(' '), [sim]);
 
   return (
-    <section id="mpc" className="dark">
-      <div className="container">
-        <Reveal clip className="section-label"><span className="num">05</span><span>Model Predictive Control</span></Reveal>
-        <Reveal clip as="h2" className="section-title">A receding-horizon controller, <em>live</em>.</Reveal>
-        <Reveal as="p" className="section-intro">A 1st-order plant under MPC control. The controller looks ahead {horizon} steps, balances tracking error (Q) against control effort (R), and rejects a step disturbance. Adjust the weights and watch the closed-loop response change.</Reveal>
-
-        <div className="mpc-grid">
+    <>
+      <div className="mpc-grid">
           <Reveal className="card mpc-canvas">
             <svg viewBox={`0 0 ${W} ${H}`} className="mpc-svg" preserveAspectRatio="xMidYMid meet">
               <defs>
-                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <filter id="mpc-glow" x="-50%" y="-50%" width="200%" height="200%">
                   <feGaussianBlur stdDeviation="4" result="blur" />
                   <feMerge>
                     <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
-                <pattern id="dot-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <pattern id="mpc-dot-grid" width="20" height="20" patternUnits="userSpaceOnUse">
                   <circle cx="1" cy="1" r="1" fill="currentColor" opacity="0.15" />
                 </pattern>
-                <linearGradient id="y-grad" x1="0" y1="0" x2="1" y2="0">
+                <linearGradient id="mpc-y-grad" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%" stopColor="var(--accent)" />
                   <stop offset="100%" stopColor={hoveredLine === 'y' || !hoveredLine ? 'var(--accent)' : 'var(--accent-2)'} />
                 </linearGradient>
-                <linearGradient id="u-grad" x1="0" y1="0" x2="1" y2="0">
+                <linearGradient id="mpc-u-grad" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%" stopColor="var(--amber, #f59e0b)" />
                   <stop offset="100%" stopColor={hoveredLine === 'u' || !hoveredLine ? 'var(--amber, #f59e0b)' : 'var(--accent-2)'} />
                 </linearGradient>
               </defs>
-              <rect width={W} height={H} fill="url(#dot-grid)" />
+              <rect width={W} height={H} fill="url(#mpc-dot-grid)" />
               <g stroke="currentColor" strokeOpacity=".1">
                 {[0, 25, 50, 75, 100].map(v => (
                   <g key={v}>
@@ -91,8 +86,8 @@ export default function MPCDemo() {
                 ))}
               </g>
               <path d={spPath} stroke="var(--accent-2)" strokeWidth="2" fill="none" strokeDasharray="6 4" opacity={hoveredLine && hoveredLine !== 'sp' ? 0.3 : 0.7} style={{ transition: 'opacity 0.3s' }} />
-              <path ref={uPathRef} d={sim.u.slice(0, kRef.current + 1).map((v, i) => (i ? 'L' : 'M') + xs(i) + ' ' + ys(v)).join(' ')} stroke="url(#u-grad)" strokeWidth="2" fill="none" opacity={hoveredLine && hoveredLine !== 'u' ? 0.3 : 1} style={{ transition: 'opacity 0.3s' }} />
-              <path ref={yPathRef} d={sim.y.slice(0, kRef.current + 1).map((v, i) => (i ? 'L' : 'M') + xs(i) + ' ' + ys(v)).join(' ')} stroke="url(#y-grad)" strokeWidth="3" fill="none" filter="url(#glow)" opacity={hoveredLine && hoveredLine !== 'y' ? 0.3 : 1} style={{ transition: 'opacity 0.3s' }} />
+              <path ref={uPathRef} d={sim.u.slice(0, kRef.current + 1).map((v, i) => (i ? 'L' : 'M') + xs(i) + ' ' + ys(v)).join(' ')} stroke="url(#mpc-u-grad)" strokeWidth="2" fill="none" opacity={hoveredLine && hoveredLine !== 'u' ? 0.3 : 1} style={{ transition: 'opacity 0.3s' }} />
+              <path ref={yPathRef} d={sim.y.slice(0, kRef.current + 1).map((v, i) => (i ? 'L' : 'M') + xs(i) + ' ' + ys(v)).join(' ')} stroke="url(#mpc-y-grad)" strokeWidth="3" fill="none" filter="url(#mpc-glow)" opacity={hoveredLine && hoveredLine !== 'y' ? 0.3 : 1} style={{ transition: 'opacity 0.3s' }} />
               <circle ref={dotRef} cx={xs(kRef.current)} cy={ys(sim.y[kRef.current] || 0)} r="6" fill="var(--accent)" stroke="var(--bg)" strokeWidth="2" className="mpc-dot" />
               <g fontFamily="JetBrains Mono, monospace" fontSize="11" fill="currentColor">
                 <text x={W - P} y={20} textAnchor="end" fillOpacity=".7">stack load %</text>
@@ -147,17 +142,30 @@ export default function MPCDemo() {
             </Reveal>
           </div>
         </div>
-      </div>
       <style>{`
-        .mpc-grid { display: grid; grid-template-columns: 1fr 280px; gap: 28px; margin-top: 60px; align-items: stretch; }
+        .mpc-grid { display: grid; grid-template-columns: 1fr 280px; gap: 28px; margin-top: 0; align-items: stretch; }
         @media (max-width: 1000px) { .mpc-grid { grid-template-columns: 1fr; } .mpc-controls { display: grid; grid-template-columns: 1fr 1fr; } }
         @media (max-width: 600px) { .mpc-controls { grid-template-columns: 1fr; } }
-        .mpc-canvas { padding: 24px; color: var(--fg); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .mpc-canvas { 
+          padding: clamp(12px, 3vw, 24px); color: var(--fg); position: relative; overflow: hidden; 
+          display: flex; align-items: center; justify-content: center; 
+          border-radius: var(--radius);
+          background: linear-gradient(180deg, color-mix(in oklab, var(--bg) 60%, transparent), var(--card));
+          border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+          box-shadow: inset 0 0 20px color-mix(in oklab, var(--accent) 5%, transparent),
+                      0 12px 40px -12px color-mix(in oklab, var(--accent) 15%, transparent);
+          transition: box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+        .mpc-canvas:hover {
+          border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+          box-shadow: inset 0 0 30px color-mix(in oklab, var(--accent) 10%, transparent),
+                      0 16px 48px -12px color-mix(in oklab, var(--accent) 25%, transparent);
+        }
         .mpc-canvas::before { content: ""; position: absolute; inset: 0;
           background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 5%, transparent), transparent 70%);
           opacity: 0.5; pointer-events: none; animation: bg-spin 20s linear infinite; }
         @keyframes bg-spin { to { transform: rotate(360deg); } }
-        .mpc-svg { width: 100%; height: 100%; max-height: 420px; display: block; }
+        .mpc-svg { width: 100%; height: auto; aspect-ratio: 800 / 320; max-height: 420px; display: block; filter: drop-shadow(0 4px 12px color-mix(in oklab, var(--accent) 15%, transparent)); }
         .mpc-dot { animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { filter: drop-shadow(0 0 3px var(--accent)); } 50% { filter: drop-shadow(0 0 8px var(--accent)); } }
         .legend .legend-item { cursor: pointer; transition: opacity 0.3s; }
@@ -165,6 +173,6 @@ export default function MPCDemo() {
         .mpc-controls { display: flex; flex-direction: column; gap: 14px; }
         .small { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
       `}</style>
-    </section>
+    </>
   );
 }

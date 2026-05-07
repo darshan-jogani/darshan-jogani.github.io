@@ -57,13 +57,8 @@ export default function Renewables() {
   const socLine = data.rows.map((r, i) => (i ? 'L' : 'M') + xs(r.h) + ',' + (H - P - (r.soc / batt) * (H - 2 * P))).join(' ');
 
   return (
-    <section id="renewables" className="alt">
-      <div className="container">
-        <Reveal clip className="section-label"><span className="num">08</span><span>Renewables Coupling</span></Reveal>
-        <Reveal clip as="h2" className="section-title">A 24-hour <em>day-in-the-life</em>.</Reveal>
-        <Reveal as="p" className="section-intro">Solar + wind feeding a 50 MW alkaline electrolyzer with a battery buffer. Tweak the sizing — watch curtailment, hydrogen output and battery state-of-charge respond.</Reveal>
-
-        <div className="ren-grid">
+    <>
+      <div className="ren-grid">
           <Reveal className="card ren-chart">
             <svg viewBox={`0 0 ${W} ${H}`} className="ren-svg">
               <g stroke="currentColor" strokeOpacity=".15">
@@ -114,12 +109,24 @@ export default function Renewables() {
             </Reveal>
           </div>
         </div>
-      </div>
       <style>{`
-        .ren-grid { display: grid; grid-template-columns: 1fr 280px; gap: 28px; margin-top: 60px; }
+        .ren-grid { display: grid; grid-template-columns: 1fr 280px; gap: 28px; margin-top: 0; }
         @media (max-width: 1000px) { .ren-grid { grid-template-columns: 1fr; } }
-        .ren-chart { padding: 16px; color: var(--fg); }
-        .ren-svg { width: 100%; height: auto; aspect-ratio: 5/2; }
+        .ren-chart { 
+          padding: clamp(12px, 3vw, 16px); color: var(--fg); 
+          border-radius: var(--radius);
+          background: linear-gradient(180deg, color-mix(in oklab, var(--bg) 60%, transparent), var(--card));
+          border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+          box-shadow: inset 0 0 20px color-mix(in oklab, var(--accent) 5%, transparent),
+                      0 12px 40px -12px color-mix(in oklab, var(--accent) 15%, transparent);
+          transition: box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+        .ren-chart:hover {
+          border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+          box-shadow: inset 0 0 30px color-mix(in oklab, var(--accent) 10%, transparent),
+                      0 16px 48px -12px color-mix(in oklab, var(--accent) 25%, transparent);
+        }
+        .ren-svg { width: 100%; height: auto; aspect-ratio: 5/2; filter: drop-shadow(0 4px 12px color-mix(in oklab, var(--accent) 15%, transparent)); }
         .ren-summary { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule-c); display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
         .ren-summary .k { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--fg-soft); margin-bottom: 4px; }
         .ren-summary .v { font-family: var(--serif); font-size: 22px; color: var(--accent); }
@@ -129,6 +136,6 @@ export default function Renewables() {
         .slider-row { display: flex; align-items: center; gap: 12px; }
         .val { font-family: var(--mono); font-size: 12px; color: var(--fg); min-width: 50px; text-align: right; }
       `}</style>
-    </section>
+    </>
   );
 }

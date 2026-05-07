@@ -77,19 +77,14 @@ export default function PolarizationCurve() {
   }, []);
 
   return (
-    <section id="polarization" className="alt">
-      <div className="container">
-        <Reveal clip className="section-label"><span className="num">04</span><span>Polarization Curve</span></Reveal>
-        <Reveal clip as="h2" className="section-title">The <em>polarization curve</em>, interactively.</Reveal>
-        <Reveal as="p" className="section-intro">A live single-cell model. Sweep current density, change pressure and temperature, and watch the operating point — and the resulting cost of hydrogen — move with you.</Reveal>
-
-        <div className="viz-wrap">
+    <>
+      <div className="viz-wrap">
           <Reveal className="card viz-card">
             <svg viewBox="0 0 800 500" className="viz-svg" preserveAspectRatio="xMidYMid meet">
               <defs>
-                <linearGradient id="grad-low" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stopColor="var(--accent)"/><stop offset="100%" stopColor="var(--accent-2)"/></linearGradient>
-                <linearGradient id="grad-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="var(--accent)" stopOpacity="0.18"/><stop offset="100%" stopColor="var(--accent)" stopOpacity="0"/></linearGradient>
-                <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <linearGradient id="pol-grad-low" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stopColor="var(--accent)"/><stop offset="100%" stopColor="var(--accent-2)"/></linearGradient>
+                <linearGradient id="pol-grad-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="var(--accent)" stopOpacity="0.18"/><stop offset="100%" stopColor="var(--accent)" stopOpacity="0"/></linearGradient>
+                <filter id="pol-glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
               </defs>
               <g stroke="currentColor" strokeOpacity=".25" strokeWidth="1">
                 <line x1="80" y1="60" x2="80" y2="430"/><line x1="80" y1="430" x2="760" y2="430"/>
@@ -114,7 +109,7 @@ export default function PolarizationCurve() {
               <path d={dFillBetween(pts_act, pts_rev)} fill="var(--indigo)" fillOpacity="0.25" />
               <path d={dFillBetween(pts_ohm, pts_act)} fill="var(--accent)" fillOpacity="0.25" />
               <path d={dFillBetween(pts_tot, pts_ohm)} fill="var(--accent)" fillOpacity="0.5" />
-              <path ref={curveRef} d={dPath(pts_tot)} fill="none" stroke="url(#grad-low)" strokeWidth="2.5" filter="url(#glow)" strokeLinecap="round"/>
+              <path ref={curveRef} d={dPath(pts_tot)} fill="none" stroke="url(#pol-grad-low)" strokeWidth="2.5" filter="url(#pol-glow)" strokeLinecap="round"/>
               <line x1={ox} y1={oy} x2={ox} y2={Y0} stroke="var(--accent)" strokeOpacity=".4" strokeDasharray="3 4"/>
               <line x1={X0} y1={oy} x2={ox} y2={oy} stroke="var(--accent)" strokeOpacity=".4" strokeDasharray="3 4"/>
               <circle cx={ox} cy={oy} r="6" fill="var(--accent)" stroke="var(--bg)" strokeWidth="2" className="op-dot"/>
@@ -171,18 +166,31 @@ export default function PolarizationCurve() {
             </Reveal>
           </div>
         </div>
-      </div>
 
       <style>{`
-        .viz-wrap { margin-top: 60px; display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: stretch; }
+        .viz-wrap { margin-top: 0; display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: stretch; }
         @media (max-width: 1000px) { .viz-wrap { grid-template-columns: 1fr; } .viz-controls { display: grid; grid-template-columns: 1fr 1fr; } }
         @media (max-width: 600px) { .viz-controls { grid-template-columns: 1fr; } }
-        .viz-card { overflow: hidden; position: relative; padding: 24px; display: flex; align-items: center; justify-content: center; }
+        .viz-card { 
+          overflow: hidden; position: relative; padding: clamp(12px, 3vw, 24px); 
+          display: flex; align-items: center; justify-content: center; 
+          border-radius: var(--radius);
+          background: linear-gradient(180deg, color-mix(in oklab, var(--bg) 60%, transparent), var(--card));
+          border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+          box-shadow: inset 0 0 20px color-mix(in oklab, var(--accent) 5%, transparent),
+                      0 12px 40px -12px color-mix(in oklab, var(--accent) 15%, transparent);
+          transition: box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+        .viz-card:hover {
+          border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+          box-shadow: inset 0 0 30px color-mix(in oklab, var(--accent) 10%, transparent),
+                      0 16px 48px -12px color-mix(in oklab, var(--accent) 25%, transparent);
+        }
         .viz-card::before { content: ""; position: absolute; inset: 0;
           background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 5%, transparent), transparent 70%);
           opacity: 0.5; pointer-events: none; animation: bg-spin 20s linear infinite; }
         @keyframes bg-spin { to { transform: rotate(360deg); } }
-        .viz-svg { width: 100%; height: 100%; max-height: 480px; display: block; color: var(--fg); position: relative; z-index: 1; }
+        .viz-svg { width: 100%; height: auto; aspect-ratio: 800 / 500; max-height: 480px; display: block; color: var(--fg); position: relative; z-index: 1; filter: drop-shadow(0 4px 12px color-mix(in oklab, var(--accent) 15%, transparent)); }
         .op-dot { animation: pulse-dot 1.5s infinite; }
         @keyframes pulse-dot { 0%, 100% { stroke-width: 2px; stroke-opacity: 1; } 50% { stroke-width: 8px; stroke-opacity: 0.4; } }
         .viz-controls { display: flex; flex-direction: column; gap: 14px; }
@@ -205,6 +213,6 @@ export default function PolarizationCurve() {
         .readout .v { color: var(--fg); text-align: right; }
         .readout .v em { color: var(--accent); font-style: normal; }
       `}</style>
-    </section>
+    </>
   );
 }
