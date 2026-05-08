@@ -129,12 +129,12 @@ function WaterMolecule() {
       <group ref={group} scale={responsiveScale}>
         {/* Oxygen Glass Shell */}
         <mesh>
-          <sphereGeometry args={[1.1, 64, 64]} />
+          <sphereGeometry args={[1.1, 32, 32]} />
           <meshPhysicalMaterial ref={oMat} transmission={1} ior={1.33} thickness={2} roughness={0.1} metalness={0.1} transparent />
         </mesh>
         {/* Oxygen Glowing Core */}
         <mesh>
-          <sphereGeometry args={[0.5, 32, 32]} />
+          <sphereGeometry args={[0.5, 16, 16]} />
           <meshStandardMaterial ref={oCoreMat} toneMapped={false} />
         </mesh>
 
@@ -147,17 +147,17 @@ function WaterMolecule() {
               <group key={i}>
                 {/* Hydrogen Glass Shell */}
                 <mesh position={p}>
-                  <sphereGeometry args={[0.55, 48, 48]} />
+                <sphereGeometry args={[0.55, 32, 32]} />
                   <meshPhysicalMaterial ref={el => hMats.current[i] = el} transmission={1} ior={1.33} thickness={1} roughness={0.1} metalness={0.1} transparent />
                 </mesh>
                 {/* Hydrogen Glowing Core */}
                 <mesh position={p}>
-                  <sphereGeometry args={[0.2, 32, 32]} />
+                <sphereGeometry args={[0.2, 16, 16]} />
                 <meshStandardMaterial ref={el => hCoreMats.current[i] = el} toneMapped={false} />
                 </mesh>
                 {/* Bonding Tube */}
                 <mesh position={mid.toArray()} quaternion={q.toArray()}>
-                  <cylinderGeometry args={[0.08, 0.08, dist, 16]} />
+                <cylinderGeometry args={[0.08, 0.08, dist, 8]} />
                   <meshStandardMaterial ref={el => bondMats.current[i] = el} transparent opacity={0.8} toneMapped={false} />
                 </mesh>
               </group>
@@ -169,17 +169,17 @@ function WaterMolecule() {
            <group key={i} ref={el => rings.current[i] = el}>
               {/* Thin Solid Wire Core */}
               <mesh>
-                 <torusGeometry args={[radius, 0.004, 12, 100]} />
+                 <torusGeometry args={[radius, 0.004, 8, 64]} />
                  <meshStandardMaterial ref={el => ringMats.current[i] = el} transparent opacity={0.9} toneMapped={false} />
               </mesh>
               {/* Inner Soft Fade */}
               <mesh>
-                 <torusGeometry args={[radius, 0.012, 12, 100]} />
+                 <torusGeometry args={[radius, 0.012, 8, 64]} />
                  <meshBasicMaterial ref={el => ringGlowMats.current[i] = el} transparent toneMapped={false} depthWrite={false} />
               </mesh>
               {/* Outer Ultra-Soft Fade */}
               <mesh>
-                 <torusGeometry args={[radius, 0.028, 12, 100]} />
+                 <torusGeometry args={[radius, 0.028, 8, 64]} />
                  <meshBasicMaterial ref={el => ringOuterGlowMats.current[i] = el} transparent toneMapped={false} depthWrite={false} />
               </mesh>
            </group>
@@ -365,8 +365,11 @@ export default function Hero() {
   const topicsRef = useRef(null);
 
   useEffect(() => {
+    const hasLoaded = sessionStorage.getItem('dj_portfolio_loaded');
+    const initDelay = hasLoaded ? 0.2 : 3.3; // Syncs perfectly: 2.4s load + 0.5s pause + 0.4s fog fade start
+
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'expo.out' }, delay: 0.4 });
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out' }, delay: initDelay });
       tl.from('.hero .eyebrow', { y: 18, opacity: 0, duration: 0.8 })
         .from('.hero .word', { y: 80, opacity: 0, duration: 1.1, stagger: 0.08 }, '-=0.5')
         .from('.hero .role', { y: 18, opacity: 0, duration: 0.8 }, '-=0.6')

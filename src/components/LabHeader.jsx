@@ -30,10 +30,10 @@ export default function LabHeader({ headerRef, onTweaks }) {
         .lab-header {
           position: sticky;
           top: 24px;
-          margin: 24px 0 32px 0;
-          align-self: center;
+          margin: 24px auto 32px auto;
           z-index: 50;
           width: calc(100% - 32px);
+          box-sizing: border-box;
           max-width: 1400px;
           border-radius: 20px;
           display: flex;

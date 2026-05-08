@@ -44,13 +44,14 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
       </div>
 
       <nav ref={navRef} className="lab-nav">
-        {NAV_ITEMS.map(item => (
+        {NAV_ITEMS.map((item, i) => (
           <button
             key={item.id}
             className={`lab-nav-item ${activeSection === item.id ? 'active' : ''}`}
             onClick={() => onNavClick(item.id)}
           >
-            {item.label}
+            <span className="lab-nav-num">{(i + 1).toString().padStart(2, '0')}</span>
+            <span className="lab-nav-label">{item.label}</span>
           </button>
         ))}
       </nav>
@@ -59,11 +60,12 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
 
       <style>{`
         .lab-sidebar {
-          width: 220px;
+          width: 250px;
           flex-shrink: 0;
           height: 100vh;
-          background: color-mix(in oklab, var(--bg) 85%, black);
+          background: linear-gradient(180deg, color-mix(in oklab, var(--bg) 95%, black), color-mix(in oklab, var(--bg) 85%, black));
           border-right: 1px solid color-mix(in oklab, var(--rule-c) 60%, transparent);
+          box-shadow: 4px 0 24px -12px rgba(0,0,0,0.5);
           display: flex;
           flex-direction: column;
           padding: 28px 0;
@@ -102,6 +104,14 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
           color: var(--accent);
           filter: drop-shadow(0 0 8px color-mix(in oklab, var(--accent) 60%, transparent));
         }
+        .lab-logo:hover .lab-logo-icon {
+          animation: logo-spin 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes logo-spin {
+          0% { transform: rotate(0deg) scale(1); }
+          50% { transform: rotate(180deg) scale(1.15); filter: drop-shadow(0 0 12px var(--accent)); }
+          100% { transform: rotate(360deg) scale(1); }
+        }
         .lab-nav {
           display: flex;
           flex-direction: column;
@@ -112,9 +122,12 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
           position: relative;
         }
         .lab-nav-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
           position: relative;
           background: none;
-          border: none;
+          border: 1px solid transparent;
           color: color-mix(in oklab, var(--fg) 45%, transparent);
           font-family: var(--mono);
           font-size: 11px;
@@ -127,26 +140,41 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
           transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
           line-height: 1.3;
         }
+        .lab-nav-num {
+          font-size: 10px;
+          color: var(--accent);
+          opacity: 0.4;
+          transition: all 0.3s ease;
+        }
+        .lab-nav-label { flex: 1; }
         .lab-nav-item::before {
           content: '';
           position: absolute;
           left: -8px;
           top: 50%;
           transform: translateY(-50%) scaleY(0);
-          width: 3px;
+          width: 4px;
           height: 18px;
           background: var(--accent);
           border-radius: 4px;
+          box-shadow: 0 0 12px 2px color-mix(in oklab, var(--accent) 60%, transparent);
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .lab-nav-item:hover {
           color: var(--fg);
           background: color-mix(in oklab, var(--fg) 5%, transparent);
+          border-color: color-mix(in oklab, var(--fg) 10%, transparent);
           transform: translateX(4px);
+          box-shadow: 0 4px 12px -6px rgba(0,0,0,0.5);
+        }
+        .lab-nav-item:hover .lab-nav-num {
+          opacity: 1;
+          text-shadow: 0 0 8px color-mix(in oklab, var(--accent) 60%, transparent);
         }
         .lab-nav-item.active {
           color: var(--accent);
           background: color-mix(in oklab, var(--accent) 8%, transparent);
+          border-color: color-mix(in oklab, var(--accent) 20%, transparent);
           font-weight: 500;
         }
         .lab-nav-item.active::before {
@@ -154,14 +182,14 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
         }
         .lab-sidebar-foot {
           font-family: var(--mono);
-          font-size: 10px;
+          font-size: 12px;
           color: color-mix(in oklab, var(--fg) 25%, transparent);
           padding: 16px 24px 0;
           border-top: 1px solid color-mix(in oklab, var(--rule-c) 30%, transparent);
           margin-top: 8px;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1000px) {
           .lab-sidebar { display: none; }
         }
 
@@ -170,9 +198,14 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
           color: color-mix(in oklab, var(--accent) 45%, black);
           filter: drop-shadow(0 0 8px color-mix(in oklab, color-mix(in oklab, var(--accent) 45%, black) 30%, transparent));
         }
+        html[data-theme="light"] .lab-sidebar {
+          background: linear-gradient(180deg, rgba(250,250,251,0.9), rgba(240,240,244,0.9));
+          box-shadow: 4px 0 24px -12px rgba(0,0,0,0.1);
+        }
         html[data-theme="light"] .lab-nav-item.active {
           color: color-mix(in oklab, var(--accent) 45%, black);
           background: color-mix(in oklab, color-mix(in oklab, var(--accent) 45%, black) 10%, transparent);
+          border-color: color-mix(in oklab, color-mix(in oklab, var(--accent) 45%, black) 20%, transparent);
         }
         html[data-theme="light"] .lab-nav-item.active::before {
           background: color-mix(in oklab, var(--accent) 45%, black);

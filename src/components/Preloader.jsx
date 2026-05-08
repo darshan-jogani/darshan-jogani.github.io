@@ -32,10 +32,11 @@ export default function Preloader() {
         raf = requestAnimationFrame(animate);
       } else {
         setPhase('granted');
+        sessionStorage.setItem('dj_portfolio_loaded', 'true');
         setTimeout(() => {
           setPhase('exiting');
-          setTimeout(() => setPhase('hidden'), 1500); // Wait for the 1.5s CSS exit animation
-        }, 800); // Admire "ACCESS GRANTED" for 800ms
+          setTimeout(() => setPhase('hidden'), 2000); // Extended for the buttery fog lift
+        }, 500); // Punchy 500ms granted pause
       }
     };
 
@@ -46,10 +47,10 @@ export default function Preloader() {
   return (
     <>
       <div id="preloader" ref={rootRef} className={`phase-${phase}`}>
-        <div className="quantum-flash"></div>
-        <div className="orbital-wrap w1"><div className="orbital-ring"></div></div>
-        <div className="orbital-wrap w2"><div className="orbital-ring"></div></div>
-        <div className="orbital-wrap w3"><div className="orbital-ring"></div></div>
+        <div className="pl-fade-layer"></div>
+        <div className="pl-bg pl-bg-top"></div>
+        <div className="pl-bg pl-bg-bottom"></div>
+        <div className="pl-split-line"></div>
         <div className="pl-content" ref={contentRef} style={{ '--p-bar': '0%', '--p-mask': '0%', '--flare-o': '0' }}>
           <div className="pl-brand" data-text="Darshan Jogani">Darshan Jogani</div>
           <div className="pl-bottom">
@@ -65,21 +66,57 @@ export default function Preloader() {
       <style>{`
         body #preloader {
           position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;
-          background-color: var(--bg); color: var(--fg);
-          transition: background-color 1.2s ease;
+          color: var(--fg);
+          pointer-events: all;
         }
-        body #preloader.phase-exiting { background-color: transparent; pointer-events: none; }
+        body #preloader.phase-exiting { pointer-events: none; }
         body #preloader.phase-hidden { display: none; }
+        
+        .pl-fade-layer {
+          position: absolute; inset: 0; z-index: -3;
+          background: radial-gradient(1200px 600px at 50% 30%, #15224b 0%, var(--navy, #0a1020) 60%);
+          transition: opacity 1.5s ease 0.4s;
+        }
+        html[data-theme="light"] .pl-fade-layer {
+          background: radial-gradient(1200px 600px at 50% 30%, #e3ecff 0%, #fafafb 60%);
+        }
+        .phase-exiting .pl-fade-layer { opacity: 0; transition: opacity 0.1s ease 0s; }
+
+        .pl-bg {
+          position: absolute; left: 0; width: 100%; height: 50vh;
+          background: radial-gradient(1200px 600px at 50% 30%, #15224b 0%, var(--navy, #0a1020) 60%);
+          background-attachment: fixed;
+          z-index: -2;
+          transition: transform 1.3s cubic-bezier(0.77, 0, 0.175, 1) 0.05s,
+                      box-shadow 0.5s ease;
+          will-change: transform;
+        }
+        html[data-theme="light"] .pl-bg {
+          background: radial-gradient(1200px 600px at 50% 30%, #e3ecff 0%, #fafafb 60%);
+          background-attachment: fixed;
+        }
+        .pl-bg-top { top: 0; box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--fg) 20%, transparent); }
+        .pl-bg-bottom { bottom: 0; box-shadow: 0 -10px 30px -10px color-mix(in oklab, var(--fg) 20%, transparent); }
+        .phase-exiting .pl-bg-top { transform: translateY(-100%); box-shadow: 0 20px 60px 6px var(--accent); }
+        .phase-exiting .pl-bg-bottom { transform: translateY(100%); box-shadow: 0 -20px 60px 6px var(--accent); }
+
+        .pl-split-line {
+          position: absolute; top: 50%; left: 0; right: 0; height: 2px;
+          background: var(--accent); box-shadow: 0 0 20px 4px var(--accent);
+          transform: translateY(-50%) scaleX(0); opacity: 0; z-index: -1;
+          transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
+        }
+        .phase-granted .pl-split-line { transform: translateY(-50%) scaleX(1); opacity: 1; }
+        .phase-exiting .pl-split-line { transform: translateY(-50%) scaleX(1); opacity: 0; transition: opacity 0.4s ease 0.1s; }
         
         .pl-content {
           display: flex; flex-direction: column; align-items: center; gap: 40px;
-          transition: transform 1.5s cubic-bezier(0.5, 0, 0.2, 1), opacity 1.2s ease, filter 1.5s ease;
-          will-change: transform, opacity, filter;
+          transition: transform 0.8s cubic-bezier(0.5, 0, 0.2, 1), opacity 0.6s ease;
+          will-change: transform, opacity;
         }
         .phase-exiting .pl-content {
-          transform: scale(4) translateZ(100px);
+          transform: scale(1.05) translateY(-10px);
           opacity: 0;
-          filter: blur(8px);
         }
         .pl-brand {
           font-family: var(--serif); font-size: clamp(36px, 10vw, 84px); font-weight: 600;
@@ -92,8 +129,8 @@ export default function Preloader() {
           content: attr(data-text); position: absolute; left: 0; top: 0; bottom: 0;
           color: var(--fg); -webkit-text-stroke: 0;
           white-space: nowrap;
-          mask-image: linear-gradient(to right, black calc(var(--p-mask) - 20%), transparent var(--p-mask));
-          -webkit-mask-image: linear-gradient(to right, black calc(var(--p-mask) - 20%), transparent var(--p-mask));
+        clip-path: polygon(0 0, var(--p-mask) 0, var(--p-mask) 100%, 0 100%);
+        -webkit-clip-path: polygon(0 0, var(--p-mask) 0, var(--p-mask) 100%, 0 100%);
           text-shadow: 0 0 20px color-mix(in oklab, var(--accent) 50%, transparent);
         }
         .pl-brand::after {
@@ -103,7 +140,6 @@ export default function Preloader() {
           box-shadow: 0 0 16px 2px var(--accent), 0 0 40px 8px var(--accent);
           transform: translateX(-50%) rotate(12deg);
           opacity: var(--flare-o);
-          mix-blend-mode: screen;
         }
         
         .pl-bottom {
@@ -147,45 +183,6 @@ export default function Preloader() {
           color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
         }
         
-        /* Atomic Warp Effects */
-        .quantum-flash {
-          position: absolute; inset: -50%;
-          background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--accent) 60%, transparent) 0%, transparent 60%);
-          opacity: 0; pointer-events: none; z-index: -1;
-        }
-        .phase-exiting .quantum-flash {
-          animation: flash-bang 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        @keyframes flash-bang {
-          0% { opacity: 0; transform: scale(0.5); }
-          20% { opacity: 1; transform: scale(1); }
-          100% { opacity: 0; transform: scale(2.5); }
-        }
-
-        .orbital-wrap {
-          position: absolute; left: 50%; top: 50%;
-          width: 240px; height: 240px; margin-left: -120px; margin-top: -120px;
-          transform-style: preserve-3d; perspective: 800px; pointer-events: none;
-        }
-        .w1 { transform: rotateX(65deg) rotateY(35deg); }
-        .w2 { transform: rotateX(55deg) rotateY(-45deg); }
-        .w3 { transform: rotateX(80deg) rotateY(15deg); }
-
-        .orbital-ring {
-          width: 100%; height: 100%; border-radius: 50%;
-          border: 1px solid var(--accent);
-          box-shadow: 0 0 10px var(--accent), inset 0 0 10px var(--accent);
-          opacity: 0; transform: scale(0);
-        }
-        .phase-exiting .w1 .orbital-ring { animation: q-expand 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        .phase-exiting .w2 .orbital-ring { animation: q-expand 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards; }
-        .phase-exiting .w3 .orbital-ring { animation: q-expand 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards; }
-
-        @keyframes q-expand {
-          0% { transform: scale(0.1) rotateZ(0deg); opacity: 1; }
-          100% { transform: scale(20) rotateZ(90deg); opacity: 0; }
-        }
-
         @media (max-width: 600px) { 
           .pl-content { gap: 24px; }
           .pl-brand { letter-spacing: 0px; }

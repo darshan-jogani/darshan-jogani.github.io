@@ -1,6 +1,7 @@
-import React, { Suspense, useRef } from 'react';
+import React, { Suspense, useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { Link } from 'react-router-dom';
 import Reveal from '../components/Reveal.jsx';
 import Equation from '../components/Equation.jsx';
 import { pillars } from '../data/skills.jsx';
@@ -40,7 +41,40 @@ const ICONS = {
   gear: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></>,
 };
 
+const EQUATIONS = {
+  0: [
+    { label: 'Butler – Volmer', tex: "j = j_0 \\left[ \\exp\\!\\left(\\tfrac{\\alpha_a F \\eta}{RT}\\right) - \\exp\\!\\left(-\\tfrac{\\alpha_c F \\eta}{RT}\\right) \\right]", desc: "Charge-transfer kinetics at the electrode surface — sets the activation overpotential of the cell." },
+    { label: 'Nernst', tex: "U_{rev} = U^\\circ - \\frac{RT}{2F}\\ln\\!\\left(\\frac{a_{H_2 O}}{a_{H_2} a_{O_2}^{1/2}}\\right)", desc: "Reversible cell voltage — the thermodynamic floor for water splitting at given T, p." },
+    { label: 'Faraday Efficiency', tex: "\\eta_F = \\frac{2 F \\dot n_{H_2}}{I}", desc: "Coulombic yield — accounts for parasitic losses and crossover in the cell stack." }
+  ],
+  1: [
+    { label: 'LCOH', tex: "\\mathrm{LCOH} = \\frac{\\mathrm{FCR}\\cdot\\mathrm{CAPEX} + \\mathrm{OPEX} + c_e \\cdot E}{\\dot m_{H_2}}", desc: "Levelized cost of hydrogen — the bottom line for any Power-to-X business case." },
+    { label: 'Net Present Value', tex: "\\mathrm{NPV} = \\sum_{t=1}^{N} \\frac{R_t}{(1+i)^t} - \\mathrm{CAPEX}", desc: "Determines the profitability of the plant over its project lifetime." }
+  ],
+  2: [
+    { label: 'MPC Objective', tex: "J = \\sum_{k=0}^{N_p-1} \\left( \\|y_{k+1|k} - r_{k+1}\\|_Q^2 + \\|\\Delta u_{k|k}\\|_R^2 \\right)", desc: "Minimizes the tracking error and control effort over the prediction horizon." },
+    { label: 'System Dynamics', tex: "x_{k+1} = A x_k + B u_k", desc: "Discrete-time linear state-space model used for predicting future plant states." }
+  ]
+};
+
+const LAB_LINKS = [
+  { to: '/lab#lab-electrolyzer', label: 'Electrolyzer' },
+  { to: '/lab#lab-tea', label: 'H2 Cost' },
+  { to: '/lab#lab-mpc', label: 'MPC Demo' }
+];
+
 export default function Research() {
+  const [activeEq, setActiveEq] = useState(null);
+
+  useEffect(() => {
+    if (activeEq !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [activeEq]);
+
   const tilt = (e) => {
     const card = e.currentTarget;
     const r = card.getBoundingClientRect();
@@ -77,7 +111,7 @@ export default function Research() {
         <Reveal as="p" className="section-intro">From electron transport at the catalyst surface to the levelized cost of hydrogen at the plant gate — same problem, three lenses.</Reveal>
 
         <div className="pillars">
-          {pillars.map(p => (
+          {pillars.map((p, i) => (
             <article className="pillar" key={p.n} onMouseMove={tilt} onMouseLeave={reset}>
               <div className="pillar-num">{p.n}</div>
               <div className="icon">
@@ -88,33 +122,41 @@ export default function Research() {
               <div className="pillar-tags">
                 {p.tags.map(t => <span key={t}>{t}</span>)}
               </div>
+              <div className="pillar-actions">
+                <button className="btn-eq" onClick={() => setActiveEq(i)} aria-label="View Equations">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 4H6l6 8-6 8h12"/></svg>
+                  Equations
+                </button>
+                <Link to={LAB_LINKS[i].to} className="btn-lab-link" aria-label={`View Lab ${LAB_LINKS[i].label}`}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M10 2v7.31"/><path d="M14 9.31V2"/><path d="M8.5 2h7"/><path d="M14 9.31L20.3 21A1 1 0 0 1 19.45 22.5H4.55A1 1 0 0 1 3.7 21L10 9.31"/></svg>
+                  {LAB_LINKS[i].label} ↗
+                </Link>
+              </div>
             </article>
           ))}
         </div>
-
-        <div className="eq-grid">
-          <Reveal className="eq-card" onMouseMove={trackGlow} onMouseLeave={(e) => { e.currentTarget.style.setProperty('--mx', '50%'); e.currentTarget.style.setProperty('--my', '50%'); }}>
-            <span className="eq-label">Butler – Volmer</span>
-            <Equation tex={"j = j_0 \\left[ \\exp\\!\\left(\\tfrac{\\alpha_a F \\eta}{RT}\\right) - \\exp\\!\\left(-\\tfrac{\\alpha_c F \\eta}{RT}\\right) \\right]"} />
-            <p>Charge-transfer kinetics at the electrode surface — sets the activation overpotential of the cell.</p>
-          </Reveal>
-          <Reveal className="eq-card" onMouseMove={trackGlow} onMouseLeave={(e) => { e.currentTarget.style.setProperty('--mx', '50%'); e.currentTarget.style.setProperty('--my', '50%'); }}>
-            <span className="eq-label">Nernst</span>
-            <Equation tex={"U_{rev} = U^\\circ - \\frac{RT}{2F}\\ln\\!\\left(\\frac{a_{H_2 O}}{a_{H_2} a_{O_2}^{1/2}}\\right)"} />
-            <p>Reversible cell voltage — the thermodynamic floor for water splitting at given T, p.</p>
-          </Reveal>
-          <Reveal className="eq-card" onMouseMove={trackGlow} onMouseLeave={(e) => { e.currentTarget.style.setProperty('--mx', '50%'); e.currentTarget.style.setProperty('--my', '50%'); }}>
-            <span className="eq-label">Faraday Efficiency</span>
-            <Equation tex={"\\eta_F = \\frac{n_{H_2,\\,actual}}{n_{H_2,\\,theoretical}} = \\frac{2 F \\dot n_{H_2}}{I}"} />
-            <p>Coulombic yield — accounts for parasitic losses and crossover in the cell stack.</p>
-          </Reveal>
-          <Reveal className="eq-card" onMouseMove={trackGlow} onMouseLeave={(e) => { e.currentTarget.style.setProperty('--mx', '50%'); e.currentTarget.style.setProperty('--my', '50%'); }}>
-            <span className="eq-label">LCOH</span>
-            <Equation tex={"\\mathrm{LCOH} = \\frac{\\mathrm{FCR}\\cdot\\mathrm{CAPEX} + \\mathrm{OPEX} + c_e \\cdot E}{\\dot m_{H_2}}"} />
-            <p>Levelized cost of hydrogen — the bottom line for any Power-to-X business case.</p>
-          </Reveal>
-        </div>
       </div>
+
+      {activeEq !== null && (
+        <div className="eq-modal-overlay" onClick={() => setActiveEq(null)}>
+          <div className="eq-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="eq-modal-close" onClick={() => setActiveEq(null)} aria-label="Close">✕</button>
+            <div className="eq-modal-header">
+              <span className="eq-modal-eyebrow">Mathematical Formulation</span>
+              <h3 className="eq-modal-title">{pillars[activeEq].title}</h3>
+            </div>
+            <div className="eq-modal-grid">
+              {EQUATIONS[activeEq].map((eq, idx) => (
+                <div className="eq-card" key={idx} onMouseMove={trackGlow} onMouseLeave={(e) => { e.currentTarget.style.setProperty('--mx', '50%'); e.currentTarget.style.setProperty('--my', '50%'); }}>
+                  <span className="eq-label">{eq.label}</span>
+                  <Equation tex={eq.tex} />
+                  <p>{eq.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 60px; }
@@ -153,9 +195,58 @@ export default function Research() {
         .pillar-tags span { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
           padding: 4px 8px; border-radius: 4px;
           background: color-mix(in oklab, var(--fg) 6%, transparent); color: var(--fg-soft); }
-
-        .eq-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 60px; }
-        @media (max-width: 800px) { .eq-grid { grid-template-columns: 1fr; } }
+          
+        .pillar-actions {
+          display: flex; flex-direction: column; gap: 12px; margin-top: 24px;
+          transform: translateZ(30px); transition: transform 0.3s;
+          position: relative; z-index: 10;
+        }
+        .btn-eq, .btn-lab-link {
+          width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+          padding: 12px 10px; border-radius: 8px; font-family: var(--mono); font-size: 11px;
+          text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none;
+          white-space: nowrap;
+        }
+        .btn-eq {
+          background: transparent; color: var(--accent); border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+        }
+        .btn-eq:hover {
+          background: color-mix(in oklab, var(--accent) 10%, transparent); border-color: var(--accent); transform: translateY(-2px);
+        }
+        .btn-lab-link {
+          background: var(--accent); color: #061a14; border: 1px solid var(--accent);
+        }
+        .btn-lab-link:hover {
+          box-shadow: 0 8px 24px -6px color-mix(in oklab, var(--accent) 60%, transparent); transform: translateY(-2px) scale(1.02);
+        }
+        
+        .eq-modal-overlay {
+          position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;
+          background: rgba(10, 16, 32, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+          padding: clamp(16px, 4vw, 24px); opacity: 0; animation: modal-fade-in 0.3s forwards;
+        }
+        .eq-modal-content {
+          position: relative; background: color-mix(in oklab, var(--bg) 85%, transparent); border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+          border-radius: 24px; padding: clamp(24px, 5vw, 40px); width: 100%; max-width: 900px;
+          max-height: calc(100vh - 32px); overflow-y: auto;
+          transform: translateY(20px) scale(0.98); animation: modal-slide-up 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          box-shadow: 0 24px 64px -12px rgba(0,0,0,0.6), 0 0 80px -10px color-mix(in oklab, var(--accent) 20%, transparent);
+        }
+        .eq-modal-content::-webkit-scrollbar { width: 4px; }
+        .eq-modal-content::-webkit-scrollbar-track { background: transparent; }
+        .eq-modal-content::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--accent) 50%, transparent); border-radius: 2px; }
+        .eq-modal-close {
+          position: absolute; top: 24px; right: 24px; background: color-mix(in oklab, var(--fg) 10%, transparent); border: none;
+          color: var(--fg); width: 32px; height: 32px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center;
+          cursor: pointer; transition: all 0.3s;
+        }
+        .eq-modal-close:hover { background: var(--rose, #ef4444); color: white; transform: rotate(90deg); }
+        .eq-modal-header { margin-bottom: 32px; text-align: center; }
+        .eq-modal-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+        .eq-modal-title { font-family: var(--serif); font-size: clamp(24px, 4vw, 32px); color: var(--fg); margin: 8px 0 0; font-weight: 500; }
+        
+        .eq-modal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .eq-card { background: var(--card); border: 1px solid var(--card-bd); border-radius: var(--radius); padding: 28px;
           display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden;
           transition: all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
@@ -172,6 +263,17 @@ export default function Research() {
           box-shadow: 0 16px 32px -16px color-mix(in oklab, var(--accent) 30%, transparent); }
         .eq-label { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
         .eq-card p { font-size: 14px; color: var(--fg-soft); margin: 0; line-height: 1.6; }
+
+        @keyframes modal-fade-in { to { opacity: 1; } }
+        @keyframes modal-slide-up { to { transform: translateY(0) scale(1); } }
+        
+        /* Light Theme Overlay Tweaks */
+        html[data-theme="light"] .eq-modal-overlay { background: rgba(250, 250, 251, 0.7); }
+        html[data-theme="light"] .eq-modal-content { background: rgba(255, 255, 255, 0.95); box-shadow: 0 24px 64px -12px rgba(0,0,0,0.1), 0 0 80px -10px color-mix(in oklab, var(--accent) 20%, transparent); }
+        html[data-theme="light"] .btn-lab-link { color: color-mix(in oklab, var(--accent) 45%, black); border-color: color-mix(in oklab, var(--accent) 45%, black); background: transparent; }
+        html[data-theme="light"] .btn-lab-link:hover { background: color-mix(in oklab, var(--accent) 45%, black); color: #ffffff; }
+        html[data-theme="light"] .eq-modal-close { background: rgba(0,0,0,0.05); color: #0f172a; }
+        html[data-theme="light"] .eq-modal-close:hover { background: #ef4444; color: #ffffff; }
       `}</style>
     </section>
   );

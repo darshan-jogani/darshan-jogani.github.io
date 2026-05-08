@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import LabSidebar from '../components/LabSidebar.jsx';
 import LabHeader from '../components/LabHeader.jsx';
 import TweaksPanel from '../components/TweaksPanel.jsx';
@@ -10,6 +11,8 @@ import TEA from '../sections/TEA.jsx';
 import PowerToX from '../sections/PowerToX.jsx';
 import Renewables from '../sections/Renewables.jsx';
 import CodeShowcase from '../sections/CodeShowcase.jsx';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const LAB_SECTIONS = [
   {
@@ -150,6 +153,7 @@ function DisclaimerOverlay({ onAccept }) {
           max-width: 560px;
           width: 100%;
           text-align: center;
+          box-sizing: border-box;
           max-height: calc(100vh - 32px);
           overflow-y: auto;
           animation: modal-pulse 4s ease-in-out infinite alternate;
@@ -313,7 +317,7 @@ export default function LabPage() {
     const tl = gsap.timeline();
 
     if (sidebarRef.current) {
-      gsap.set(sidebarRef.current, { x: -220 });
+      gsap.set(sidebarRef.current, { x: -250 });
       tl.to(sidebarRef.current, { x: 0, duration: 0.5, ease: 'expo.out' });
     }
     if (headerRef.current) {
@@ -330,7 +334,7 @@ export default function LabPage() {
         scanLineRef.current,
         { top: 0, opacity: 1 },
         {
-          top: '100%',
+          top: '100vh',
           duration: 0.8,
           ease: 'none',
           onComplete: () => gsap.to(scanLineRef.current, { opacity: 0, duration: 0.2 }),
@@ -343,17 +347,33 @@ export default function LabPage() {
   // Set hidden positions before browser paints so there's no flash when lab becomes visible
   useLayoutEffect(() => {
     if (!sidebarRef.current || !headerRef.current || !firstSectionRef.current) return;
-    gsap.set(sidebarRef.current, { x: -220 });
+    gsap.set(sidebarRef.current, { x: -250 });
     gsap.set(headerRef.current, { y: -40 });
     gsap.set(firstSectionRef.current, { y: 30, opacity: 0 });
   }, [labVisible]);
 
   useEffect(() => {
     if (labVisible) {
-      const id = requestAnimationFrame(runEntrance);
+      const id = requestAnimationFrame(() => {
+        runEntrance();
+        // Force a layout refresh once the lock is removed
+        setTimeout(() => ScrollTrigger.refresh(), 150);
+      });
       return () => cancelAnimationFrame(id);
     }
   }, [labVisible, runEntrance]);
+
+  // Handle deep-linking from the main Research section buttons
+  useEffect(() => {
+    if (labVisible && window.location.hash) {
+      const targetId = window.location.hash.substring(1);
+      // Give the entrance GSAP timeline a split-second to reveal the containers
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 600);
+    }
+  }, [labVisible]);
 
   useEffect(() => {
     if (!labVisible) return;
@@ -392,15 +412,17 @@ export default function LabPage() {
     <>
       {!labVisible && <DisclaimerOverlay onAccept={handleDisclaimerAccept} />}
 
-      <div className="lab-layout" style={{ opacity: labVisible ? 1 : 0, pointerEvents: labVisible ? 'auto' : 'none', transition: 'opacity 0.4s ease' }} aria-hidden={!labVisible}>
-        <LabSidebar 
-          sidebarRef={sidebarRef} 
-          activeSection={activeSection}
-          onNavClick={(id) => {
-            const el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
-        />
+      <div className={`lab-layout ${!labVisible ? 'locked' : ''}`} style={{ opacity: labVisible ? 1 : 0, pointerEvents: labVisible ? 'auto' : 'none', transition: 'opacity 0.4s ease' }} aria-hidden={!labVisible}>
+        <div className="lab-sidebar-wrapper">
+          <LabSidebar 
+            sidebarRef={sidebarRef} 
+            activeSection={activeSection}
+            onNavClick={(id) => {
+              const el = document.getElementById(id);
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+          />
+        </div>
 
         <div className="lab-content">
           <div ref={scanLineRef} className="lab-scan-line" aria-hidden="true" />
@@ -455,21 +477,29 @@ export default function LabPage() {
       <style>{`
         .lab-layout {
           display: flex;
+          min-height: 100vh;
+          background: var(--bg);
+        }
+        .lab-layout.locked {
           height: 100vh;
           overflow: hidden;
-          background: var(--bg);
+        }
+        .lab-sidebar-wrapper {
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          flex-shrink: 0;
+          z-index: 100;
         }
         .lab-content {
           flex: 1;
-          overflow-y: auto;
-          scroll-behavior: smooth;
           position: relative;
           display: flex;
           flex-direction: column;
+          min-width: 0;
           background-image: radial-gradient(color-mix(in oklab, var(--fg) 15%, transparent) 1px, transparent 1px);
           background-size: 32px 32px;
           background-position: center top;
-          overflow-x: hidden;
         }
         .lab-scan-line {
           position: absolute;
@@ -504,6 +534,7 @@ export default function LabPage() {
           max-width: var(--maxw, 1240px);
           margin: 0 auto;
           width: 100%;
+          box-sizing: border-box;
         }
         .lab-section-head {
           padding: 60px clamp(20px, 4vw, 48px) 0;
@@ -511,6 +542,7 @@ export default function LabPage() {
           margin: 0 auto;
           width: 100%;
           flex-shrink: 0;
+          box-sizing: border-box;
           position: relative;
           z-index: 10;
         }
@@ -572,6 +604,7 @@ export default function LabPage() {
           border-radius: 999px;
           overflow-x: auto;
           -webkit-overflow-scrolling: touch;
+          box-sizing: border-box;
           padding: 8px;
           gap: 8px;
           scrollbar-width: none;
@@ -603,8 +636,9 @@ export default function LabPage() {
           box-shadow: 0 4px 12px -4px var(--accent);
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1000px) {
           .lab-layout { flex-direction: column; }
+          .lab-sidebar-wrapper { display: none; }
           .lab-tab-bar { display: flex; }
           .lab-sections { padding-bottom: 120px; }
           .lab-section-head { padding: 28px 20px 0; }
