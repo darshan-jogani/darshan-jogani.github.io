@@ -366,7 +366,7 @@ export default function Hero() {
 
   useEffect(() => {
     const hasLoaded = sessionStorage.getItem('dj_portfolio_loaded');
-    const initDelay = hasLoaded ? 0.2 : 3.3; // Syncs perfectly: 2.4s load + 0.5s pause + 0.4s fog fade start
+    const initDelay = hasLoaded ? 0.2 : 3.6; // Syncs perfectly: 2.4s load + 1.2s pause
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'expo.out' }, delay: initDelay });

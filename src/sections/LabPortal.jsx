@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Canvas } from '@react-three/fiber';
 import { gsap } from 'gsap';
@@ -12,15 +12,23 @@ export default function LabPortal() {
   const eyebrowRef = useRef(null);
   const bodyRef = useRef(null);
   const btnRef = useRef(null);
+  const glowRef = useRef(null);
+  const xTo = useRef(null);
+  const yTo = useRef(null);
+  const [render3D, setRender3D] = useState(false);
 
   useEffect(() => {
     const el = sectionRef.current;
-    if (!el) return;
+    if (!el || !glowRef.current) return;
 
-    // Breathing ambient background — cycles between two deep navy tones
-    el.style.setProperty('--lp-glow', '0.25');
-    const breathe = gsap.to(el, {
-      '--lp-glow': 0.55,
+    // Setup performant GPU-accelerated mouse tracking
+    gsap.set(glowRef.current, { x: (el.offsetWidth / 2) - 400, y: (el.offsetHeight / 2) - 400 });
+    xTo.current = gsap.quickTo(glowRef.current, 'x', { duration: 0.8, ease: 'power3.out' });
+    yTo.current = gsap.quickTo(glowRef.current, 'y', { duration: 0.8, ease: 'power3.out' });
+
+    // Breathing ambient background
+    const breathe = gsap.to(glowRef.current, {
+      opacity: 0.55,
       duration: 6,
       yoyo: true,
       repeat: -1,
@@ -29,6 +37,15 @@ export default function LabPortal() {
 
     // Scroll-entry stagger animation
     const ctx = gsap.context(() => {
+      
+      // Defer heavy WebGL shader compilation until section approaches viewport
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 150%',
+        once: true,
+        onEnter: () => setRender3D(true),
+      });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: el,
@@ -49,22 +66,23 @@ export default function LabPortal() {
   }, []);
 
   const handleMouseMove = (e) => {
-    if (!sectionRef.current) return;
+    if (!sectionRef.current || !xTo.current || !yTo.current) return;
     const rect = sectionRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    sectionRef.current.style.setProperty('--mouse-x', `${x}px`);
-    sectionRef.current.style.setProperty('--mouse-y', `${y}px`);
+    xTo.current(e.clientX - rect.left - 400);
+    yTo.current(e.clientY - rect.top - 400);
   };
 
   return (
       <section ref={sectionRef} id="lab-portal" className="lab-portal" onMouseMove={handleMouseMove}>
+      <div ref={glowRef} className="lp-glow" aria-hidden="true" />
       {/* Particle canvas — lives behind the text at reduced opacity */}
       <div className="lp-canvas" aria-hidden="true">
-        <Canvas camera={{ position: [0, 0, 9], fov: 45 }} dpr={[1, 1.5]}>
-          <ambientLight intensity={0.3} />
-          <Bubbles count={160} />
-        </Canvas>
+        {render3D && (
+          <Canvas camera={{ position: [0, 0, 9], fov: 45 }} dpr={[1, 1.5]} gl={{ antialias: false, powerPreference: "high-performance" }}>
+            <ambientLight intensity={0.3} />
+            <Bubbles count={60} />
+          </Canvas>
+        )}
       </div>
 
       <div className="lp-inner">
@@ -94,15 +112,16 @@ export default function LabPortal() {
           overflow: hidden;
           transition: background 0.4s ease;
         }
-        .lab-portal::before {
-          content: '';
+        .lp-glow {
           position: absolute;
-          inset: 0;
-          background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), #1e2d5c, transparent 70%);
-          opacity: var(--lp-glow, 0.25);
+          top: 0; left: 0;
+          width: 800px; height: 800px;
+          background: radial-gradient(circle, #1e2d5c 0%, transparent 70%);
+          border-radius: 50%;
           z-index: 1;
           pointer-events: none;
-          transition: background 0.4s ease;
+          opacity: 0.25;
+          will-change: transform, opacity;
         }
         .lp-canvas {
           position: absolute;
@@ -176,8 +195,8 @@ export default function LabPortal() {
         html[data-theme="light"] .lab-portal {
           background: #e2e8f0;
         }
-        html[data-theme="light"] .lab-portal::before {
-          background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), #ffffff, transparent 70%);
+        html[data-theme="light"] .lp-glow {
+          background: radial-gradient(circle, #ffffff 0%, transparent 70%);
         }
         html[data-theme="light"] .lp-heading {
           color: #0f172a;

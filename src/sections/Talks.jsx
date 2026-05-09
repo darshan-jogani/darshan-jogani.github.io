@@ -1,17 +1,36 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Reveal from '../components/Reveal.jsx';
 import { talks } from '../data/talks.jsx';
 
+gsap.registerPlugin(ScrollTrigger);
+
 export default function Talks() {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.set('.tl-item', { y: 30, opacity: 0 });
+      ScrollTrigger.batch('.tl-item', {
+        start: 'top 90%',
+        onEnter: (batch) => {
+          gsap.to(batch, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'expo.out', overwrite: true, clearProps: 'transform' });
+        }
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="talks" className="alt">
+    <section id="talks" className="alt" ref={sectionRef}>
       <div className="container">
         <Reveal clip className="section-label"><span className="num">11</span><span>Talks & Conferences</span></Reveal>
         <Reveal clip as="h2" className="section-title">Where I've <em>shared the work</em>.</Reveal>
 
         <ol className="timeline">
           {talks.map((t, i) => (
-            <Reveal as="li" className={`tl-item ${t.upcoming ? 'upcoming' : ''}`} key={i}>
+            <li className={`tl-item ${t.upcoming ? 'upcoming' : ''}`} key={i}>
               <div className="tl-dot"/>
               <div className="tl-date mono">{t.date}</div>
               <div className="tl-body">
@@ -20,7 +39,7 @@ export default function Talks() {
                 <p>{t.note}</p>
                 {t.upcoming && <span className="tl-tag">Upcoming</span>}
               </div>
-            </Reveal>
+            </li>
           ))}
         </ol>
       </div>

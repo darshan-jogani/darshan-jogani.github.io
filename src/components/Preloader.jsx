@@ -35,8 +35,8 @@ export default function Preloader() {
         sessionStorage.setItem('dj_portfolio_loaded', 'true');
         setTimeout(() => {
           setPhase('exiting');
-          setTimeout(() => setPhase('hidden'), 2000); // Extended for the buttery fog lift
-        }, 500); // Punchy 500ms granted pause
+          setTimeout(() => setPhase('hidden'), 1000); // Lightweight smooth fade out
+        }, 1200); // Epic 1.2s granted pause to admire the unlock
       }
     };
 
@@ -47,67 +47,36 @@ export default function Preloader() {
   return (
     <>
       <div id="preloader" ref={rootRef} className={`phase-${phase}`}>
-        <div className="pl-fade-layer"></div>
-        <div className="pl-bg pl-bg-top"></div>
-        <div className="pl-bg pl-bg-bottom"></div>
-        <div className="pl-split-line"></div>
         <div className="pl-content" ref={contentRef} style={{ '--p-bar': '0%', '--p-mask': '0%', '--flare-o': '0' }}>
           <div className="pl-brand" data-text="Darshan Jogani">Darshan Jogani</div>
-          <div className="pl-bottom">
-            <span className="pl-status" style={{ minWidth: '120px', textAlign: 'left', whiteSpace: 'nowrap' }}>
-              {phase === 'loading' ? 'SYS.INIT' : 'ACCESS GRANTED'}
-              <span className="pl-cursor">_</span>
-            </span>
-            <div className="pl-bar"><div className="pl-bar-inner"></div></div>
-            <span className="pl-percent" ref={percentRef}>000%</span>
+          <div className="pl-bottom-wrap">
+            <div className="pl-bottom">
+              <span className="pl-status" style={{ minWidth: '120px', textAlign: 'left', whiteSpace: 'nowrap' }}>
+                SYS.INIT{phase === 'loading' && <span className="pl-cursor">_</span>}
+              </span>
+              <div className="pl-bar"><div className="pl-bar-inner"></div></div>
+              <span className="pl-percent" ref={percentRef}>000%</span>
+            </div>
+            <div className="pl-granted-msg">
+              ACCESS GRANTED<span className="pl-cursor">_</span>
+            </div>
           </div>
         </div>
       </div>
       <style>{`
         body #preloader {
           position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;
+          background: radial-gradient(1200px 600px at 50% 30%, #15224b 0%, var(--navy, #0a1020) 60%);
           color: var(--fg);
           pointer-events: all;
+          transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
+          will-change: opacity, visibility;
         }
-        body #preloader.phase-exiting { pointer-events: none; }
+        html[data-theme="light"] body #preloader {
+          background: radial-gradient(1200px 600px at 50% 30%, #e3ecff 0%, #fafafb 60%);
+        }
+        body #preloader.phase-exiting { opacity: 0; visibility: hidden; pointer-events: none; }
         body #preloader.phase-hidden { display: none; }
-        
-        .pl-fade-layer {
-          position: absolute; inset: 0; z-index: -3;
-          background: radial-gradient(1200px 600px at 50% 30%, #15224b 0%, var(--navy, #0a1020) 60%);
-          transition: opacity 1.5s ease 0.4s;
-        }
-        html[data-theme="light"] .pl-fade-layer {
-          background: radial-gradient(1200px 600px at 50% 30%, #e3ecff 0%, #fafafb 60%);
-        }
-        .phase-exiting .pl-fade-layer { opacity: 0; transition: opacity 0.1s ease 0s; }
-
-        .pl-bg {
-          position: absolute; left: 0; width: 100%; height: 50vh;
-          background: radial-gradient(1200px 600px at 50% 30%, #15224b 0%, var(--navy, #0a1020) 60%);
-          background-attachment: fixed;
-          z-index: -2;
-          transition: transform 1.3s cubic-bezier(0.77, 0, 0.175, 1) 0.05s,
-                      box-shadow 0.5s ease;
-          will-change: transform;
-        }
-        html[data-theme="light"] .pl-bg {
-          background: radial-gradient(1200px 600px at 50% 30%, #e3ecff 0%, #fafafb 60%);
-          background-attachment: fixed;
-        }
-        .pl-bg-top { top: 0; box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--fg) 20%, transparent); }
-        .pl-bg-bottom { bottom: 0; box-shadow: 0 -10px 30px -10px color-mix(in oklab, var(--fg) 20%, transparent); }
-        .phase-exiting .pl-bg-top { transform: translateY(-100%); box-shadow: 0 20px 60px 6px var(--accent); }
-        .phase-exiting .pl-bg-bottom { transform: translateY(100%); box-shadow: 0 -20px 60px 6px var(--accent); }
-
-        .pl-split-line {
-          position: absolute; top: 50%; left: 0; right: 0; height: 2px;
-          background: var(--accent); box-shadow: 0 0 20px 4px var(--accent);
-          transform: translateY(-50%) scaleX(0); opacity: 0; z-index: -1;
-          transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
-        }
-        .phase-granted .pl-split-line { transform: translateY(-50%) scaleX(1); opacity: 1; }
-        .phase-exiting .pl-split-line { transform: translateY(-50%) scaleX(1); opacity: 0; transition: opacity 0.4s ease 0.1s; }
         
         .pl-content {
           display: flex; flex-direction: column; align-items: center; gap: 40px;
@@ -147,11 +116,6 @@ export default function Preloader() {
           font-family: var(--mono); font-size: 11px; color: var(--fg-soft);
           letter-spacing: 2px; text-transform: uppercase;
         }
-        .pl-status { transition: color 0.4s, text-shadow 0.4s; }
-        .phase-granted .pl-status, .phase-exiting .pl-status {
-          color: #10b981;
-          text-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
-        }
         .pl-cursor { animation: blink 1s step-end infinite; }
         .pl-bar {
           width: 200px; height: 2px; background: color-mix(in oklab, var(--rule-c) 40%, transparent);
@@ -183,16 +147,76 @@ export default function Preloader() {
           color: #10b981; text-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
         }
         
+        .pl-bottom-wrap {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .pl-granted-msg {
+          position: absolute;
+          top: 100%;
+          margin-top: 24px;
+          font-family: var(--mono);
+          font-size: clamp(18px, 4vw, 28px);
+          font-weight: 700;
+          color: #10b981;
+          letter-spacing: 24px;
+          opacity: 0;
+          filter: blur(8px);
+          transform: translateY(-15px) scale(0.9);
+          transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          white-space: nowrap;
+          pointer-events: none;
+          display: flex;
+          align-items: center;
+        }
+        .phase-granted .pl-granted-msg, .phase-exiting .pl-granted-msg {
+          opacity: 1;
+          filter: blur(0);
+          letter-spacing: 4px;
+          transform: translateY(0) scale(1);
+          animation: granted-glow 1.2s ease-out forwards;
+        }
+        
+        .pl-granted-msg::before, .pl-granted-msg::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          width: clamp(20px, 8vw, 80px);
+          height: 1px;
+          background: #10b981;
+          box-shadow: 0 0 10px 2px #10b981;
+          transform: scaleX(0);
+          transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s, opacity 0.3s;
+          opacity: 0;
+        }
+        .pl-granted-msg::before { right: 100%; margin-right: 16px; transform-origin: right; }
+        .pl-granted-msg::after { left: 100%; margin-left: 16px; transform-origin: left; }
+
+        .phase-granted .pl-granted-msg::before, .phase-exiting .pl-granted-msg::before,
+        .phase-granted .pl-granted-msg::after, .phase-exiting .pl-granted-msg::after {
+          transform: scaleX(1);
+          opacity: 1;
+        }
+
         @media (max-width: 600px) { 
           .pl-content { gap: 24px; }
           .pl-brand { letter-spacing: 0px; }
           .pl-bottom { gap: 12px; font-size: 10px; }
           .pl-bar { width: 120px; } 
+          .pl-granted-msg { margin-top: 16px; letter-spacing: 12px; }
+          .phase-granted .pl-granted-msg, .phase-exiting .pl-granted-msg { letter-spacing: 2px; }
         }
         @keyframes brand-fade-in {
           to { transform: scale(1); opacity: 1; }
         }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes granted-glow {
+          0% { text-shadow: 0 0 20px #fff, 0 0 40px #fff; color: #fff; }
+          20% { text-shadow: 0 0 30px #10b981, 0 0 60px #10b981; color: #10b981; }
+          100% { text-shadow: 0 0 16px rgba(16, 185, 129, 0.8), 0 0 32px rgba(16, 185, 129, 0.4); color: #10b981; }
+        }
       `}</style>
     </>
   );

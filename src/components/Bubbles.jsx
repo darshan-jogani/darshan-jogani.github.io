@@ -29,10 +29,21 @@ export default function Bubbles({ count = 220 }) {
       if (!materialRef.current) return;
       const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00d4aa';
-      materialRef.current.color.set(accent);
-      materialRef.current.emissive.set(accent);
-      materialRef.current.emissiveIntensity = isLight ? 0.3 : 0.6;
-      materialRef.current.opacity = isLight ? 0.4 : 0.7;
+      
+      const baseColor = new THREE.Color(accent);
+      materialRef.current.color.copy(baseColor);
+      materialRef.current.emissive.copy(baseColor);
+      
+      if (isLight) {
+        materialRef.current.emissiveIntensity = 0.4;
+        materialRef.current.opacity = 0.25;
+        materialRef.current.blending = THREE.NormalBlending;
+      } else {
+        materialRef.current.emissiveIntensity = 0.8;
+        materialRef.current.opacity = 0.6;
+        materialRef.current.blending = THREE.AdditiveBlending;
+      }
+      materialRef.current.needsUpdate = true;
     };
     syncColor();
     const observer = new MutationObserver(syncColor);
@@ -58,17 +69,13 @@ export default function Bubbles({ count = 220 }) {
 
   return (
     <instancedMesh ref={meshRef} args={[null, null, count]}>
-      <sphereGeometry args={[0.03, 32, 32]} />
-      <meshPhysicalMaterial
+      <sphereGeometry args={[0.03, 12, 12]} />
+      <meshStandardMaterial
         ref={materialRef}
         color="#00d4aa"
         emissive="#00d4aa"
-        emissiveIntensity={0.6}
-        metalness={0.2}
-        roughness={0.1}
-        clearcoat={1}
         transparent
-        opacity={0.7}
+        toneMapped={false}
         depthWrite={false}
       />
     </instancedMesh>

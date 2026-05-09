@@ -1,6 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Reveal from '../components/Reveal.jsx';
 import { publications, toBibtex } from '../data/publications.jsx';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const TYPES = [
   { k: 'all', label: 'All' },
@@ -10,6 +14,7 @@ const TYPES = [
 ];
 
 export default function Publications() {
+  const sectionRef = useRef(null);
   const [filter, setFilter] = useState('all');
   const [q, setQ] = useState('');
   const [bib, setBib] = useState(null);
@@ -21,12 +26,25 @@ export default function Publications() {
     return s.includes(q.toLowerCase());
   }), [filter, q]);
 
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.set('.pub-row', { y: 30, opacity: 0 });
+      ScrollTrigger.batch('.pub-row', {
+        start: 'top 90%',
+        onEnter: (batch) => {
+          gsap.to(batch, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'expo.out', overwrite: true, clearProps: 'transform' });
+        }
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, [list]); // Re-run when list filters change
+
   const copy = (text) => {
     navigator.clipboard?.writeText(text);
   };
 
   return (
-    <section id="publications" className="dark">
+    <section id="publications" className="dark" ref={sectionRef}>
       <div className="container">
         <Reveal clip className="section-label"><span className="num">10</span><span>Publications</span></Reveal>
         <Reveal clip as="h2" className="section-title">Selected <em>writing</em>.</Reveal>
@@ -46,7 +64,7 @@ export default function Publications() {
 
         <div className="pub-list">
           {list.map(p => (
-            <Reveal key={p.id} className="pub-row">
+            <div key={p.id} className="pub-row">
               <div className="pub-year mono">{p.year}</div>
               <div className="pub-body">
                 <div className="pub-type mono">{p.type === 'thesis' ? 'Thesis' : p.type === 'conference' ? 'Conference' : 'Article'} · {p.status}</div>
@@ -61,7 +79,7 @@ export default function Publications() {
                 <button className="btn" onClick={() => setBib(p)}>BibTeX</button>
                 {p.doi && p.doi !== '#' && <a className="btn" href={p.doi} target="_blank" rel="noreferrer">DOI ↗</a>}
               </div>
-            </Reveal>
+            </div>
           ))}
           {list.length === 0 && <p className="muted mono small" style={{ padding: '40px 0' }}>No publications match.</p>}
         </div>
@@ -99,9 +117,10 @@ export default function Publications() {
         .pub-title { font-family: var(--serif); font-size: clamp(20px, 2vw, 26px); font-weight: 500; line-height: 1.25; margin: 6px 0 10px; color: var(--fg); }
         .pub-meta { display: flex; gap: 18px; font-size: 13px; color: var(--fg-soft); flex-wrap: wrap; }
         .pub-venue { font-style: italic; }
-        .pub-abstract { margin: 12px 0 0; max-width: 70ch; font-size: 14px; color: var(--fg-soft); line-height: 1.65;
-          max-height: 0; overflow: hidden; opacity: 0; transition: all .35s ease; }
-        .pub-row:hover .pub-abstract { max-height: 200px; opacity: 1; margin-top: 12px; }
+        .pub-abstract { margin: 0; max-width: 70ch; font-size: 14px; color: var(--fg-soft); line-height: 1.65;
+          max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease; 
+          will-change: max-height, opacity, margin-top; }
+        .pub-row:hover .pub-abstract { max-height: 300px; opacity: 1; margin-top: 12px; }
         .pub-actions { display: flex; gap: 6px; flex-direction: column; }
         @media (max-width: 700px) { .pub-row { grid-template-columns: 1fr; } .pub-actions { flex-direction: row; } }
 

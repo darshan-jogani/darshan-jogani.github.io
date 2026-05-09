@@ -28,8 +28,13 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
 
   return (
     <aside ref={sidebarRef} className="lab-sidebar" aria-label="Lab navigation">
-      <Link to="/" className="lab-back">
-        ← Portfolio
+      <Link to="/" className="lab-back" aria-label="Back to Portfolio">
+        <span className="lab-back-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </span>
+        <span className="lab-back-text">Portfolio</span>
       </Link>
 
       <hr className="lab-rule" />
@@ -72,17 +77,51 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
           overflow: hidden;
         }
         .lab-back {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 0 16px;
+          padding: 12px 16px;
+          background: color-mix(in oklab, var(--accent) 10%, transparent);
+          border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
+          border-radius: 12px;
           font-family: var(--mono);
           font-size: 11px;
+          font-weight: 600;
           letter-spacing: 1.5px;
           text-transform: uppercase;
           color: var(--accent);
           text-decoration: none;
-          padding: 0 20px 0 24px;
-          display: block;
-          transition: opacity 0.2s;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          position: relative;
+          overflow: hidden;
         }
-        .lab-back:hover { opacity: 0.7; }
+        .lab-back::before {
+          content: '';
+          position: absolute; inset: 0;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transform: translateX(-100%) skewX(-15deg);
+          transition: transform 0.6s ease;
+        }
+        .lab-back:hover {
+          background: var(--accent);
+          color: #061a14;
+          border-color: var(--accent);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px -6px color-mix(in oklab, var(--accent) 60%, transparent);
+        }
+        .lab-back:hover::before {
+          transform: translateX(100%) skewX(-15deg);
+        }
+        .lab-back-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .lab-back:hover .lab-back-icon {
+          transform: translateX(-4px);
+        }
         .lab-rule {
           border: none;
           border-top: 1px solid color-mix(in oklab, var(--rule-c) 50%, transparent);
@@ -211,7 +250,14 @@ export default function LabSidebar({ sidebarRef, activeSection, onNavClick }) {
           background: color-mix(in oklab, var(--accent) 45%, black);
         }
         html[data-theme="light"] .lab-back {
+          background: color-mix(in oklab, var(--accent) 10%, transparent);
           color: color-mix(in oklab, var(--accent) 45%, black);
+          border-color: color-mix(in oklab, color-mix(in oklab, var(--accent) 45%, black) 30%, transparent);
+        }
+        html[data-theme="light"] .lab-back:hover {
+          background: color-mix(in oklab, var(--accent) 45%, black);
+          color: #ffffff;
+          box-shadow: 0 8px 24px -6px color-mix(in oklab, color-mix(in oklab, var(--accent) 45%, black) 40%, transparent);
         }
       `}</style>
     </aside>

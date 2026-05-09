@@ -5,16 +5,23 @@ import ThemeToggle from './ThemeToggle.jsx';
 export default function LabHeader({ headerRef, onTweaks }) {
   return (
     <header ref={headerRef} className="lab-header">
-      <Link to="/" className="brand" aria-label="Back to Home">
-        <span className="brand-mark">
+      <div className="lab-header-brand-group">
+        <Link to="/" className="lab-mobile-back" aria-label="Back to Portfolio">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 3h6"></path>
-            <path d="M10 3v5c0 .5-.2 1-.5 1.4l-5.6 6.3c-.6.7-.1 1.8.8 1.8h14.6c.9 0 1.4-1.1.8-1.8l-5.6-6.3c-.3-.4-.5-.9-.5-1.4V3"></path>
-            <path d="M6 14h12"></path>
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
-        </span>
-        <span className="brand-text">DJ's Research Lab</span>
-      </Link>
+        </Link>
+        <Link to="/" className="brand" aria-label="Back to Home">
+          <span className="brand-mark">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 3h6"></path>
+              <path d="M10 3v5c0 .5-.2 1-.5 1.4l-5.6 6.3c-.6.7-.1 1.8.8 1.8h14.6c.9 0 1.4-1.1.8-1.8l-5.6-6.3c-.3-.4-.5-.9-.5-1.4V3"></path>
+              <path d="M6 14h12"></path>
+            </svg>
+          </span>
+          <span className="brand-text">DJ's Research Lab</span>
+        </Link>
+      </div>
       <div className="lab-header-actions">
         <ThemeToggle />
         <button className="btn lab-tweaks-btn" onClick={onTweaks} aria-label="Tweaks">
@@ -47,6 +54,28 @@ export default function LabHeader({ headerRef, onTweaks }) {
           box-shadow: 0 16px 40px -12px rgba(0,0,0,0.5), inset 0 1px 0 color-mix(in oklab, var(--fg) 10%, transparent);
           color: var(--fg);
           transition: all 0.4s ease;
+        }
+        .lab-header-brand-group {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .lab-mobile-back {
+          display: none;
+          align-items: center;
+          justify-content: center;
+          width: 36px; height: 36px; border-radius: 10px;
+          background: color-mix(in oklab, var(--accent) 15%, transparent);
+          color: var(--accent);
+          border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+          box-shadow: 0 4px 12px -4px color-mix(in oklab, var(--accent) 50%, transparent);
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .lab-mobile-back:hover {
+          background: var(--accent);
+          color: #061a14;
+          transform: translateX(-2px);
+          box-shadow: 0 6px 20px -4px var(--accent);
         }
         .brand { 
           display: inline-flex; 
@@ -115,6 +144,11 @@ export default function LabHeader({ headerRef, onTweaks }) {
         }
 
         /* Responsive Adjustments */
+        @media (max-width: 1000px) {
+          .lab-mobile-back {
+            display: inline-flex;
+          }
+        }
         @media (max-width: 768px) {
           .lab-header { 
             top: 16px; 
@@ -127,6 +161,9 @@ export default function LabHeader({ headerRef, onTweaks }) {
           }
         }
         @media (max-width: 600px) {
+          .lab-header-brand-group { gap: 10px; }
+          .lab-mobile-back { width: 30px; height: 30px; }
+          .lab-mobile-back svg { width: 14px; height: 14px; }
           .brand { gap: 8px; font-size: clamp(14px, 4vw, 18px); }
           .brand-mark { width: 30px; height: 30px; font-size: 12px; }
           .lab-header { padding: 10px 14px; width: calc(100% - 16px); }
@@ -149,6 +186,17 @@ export default function LabHeader({ headerRef, onTweaks }) {
         html[data-theme="light"] .lab-tweaks-btn {
           color: color-mix(in oklab, var(--accent) 45%, black);
           border-color: color-mix(in oklab, color-mix(in oklab, var(--accent) 45%, black) 30%, transparent);
+        }
+        html[data-theme="light"] .lab-mobile-back {
+          background: color-mix(in oklab, var(--accent) 15%, transparent);
+          color: color-mix(in oklab, var(--accent) 45%, black);
+          border-color: color-mix(in oklab, color-mix(in oklab, var(--accent) 45%, black) 25%, transparent);
+          box-shadow: 0 4px 12px -4px color-mix(in oklab, color-mix(in oklab, var(--accent) 45%, black) 30%, transparent);
+        }
+        html[data-theme="light"] .lab-mobile-back:hover {
+          background: color-mix(in oklab, var(--accent) 45%, black);
+          color: #ffffff;
+          box-shadow: 0 6px 20px -4px color-mix(in oklab, color-mix(in oklab, var(--accent) 45%, black) 40%, transparent);
         }
         html[data-theme="light"] .brand-mark {
           background: color-mix(in oklab, var(--accent) 15%, transparent);

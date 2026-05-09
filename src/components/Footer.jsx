@@ -1,6 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Footer() {
+  const [visits, setVisits] = useState('...');
+
+  useEffect(() => {
+    // Intelligently check if we've already incremented in this session
+    const hasVisited = sessionStorage.getItem('dj_visited');
+    const action = hasVisited ? '' : '/up';
+    
+    fetch(`https://api.counterapi.dev/v1/darshanjogani/portfolio${action}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.count) {
+          setVisits(data.count.toLocaleString());
+          sessionStorage.setItem('dj_visited', 'true');
+        }
+      })
+      .catch(() => {
+        setVisits('Online'); // Safe fallback if API is temporarily unreachable
+      });
+  }, []);
+
   return (
     <footer className="foot">
       <div className="foot-flare"></div>
@@ -9,6 +29,16 @@ export default function Footer() {
           <div className="foot-brand">
             <h3>Darshan Jogani</h3>
             <p className="mono">Engineering the transition to sustainable energy.</p>
+            
+            <div className="visit-counter" title="Total Website Views">
+              <div className="vc-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              </div>
+              <div className="vc-info">
+                <span className="vc-label mono">Total Explorers</span>
+                <span className="vc-count mono">{visits}</span>
+              </div>
+            </div>
           </div>
           
           <div className="foot-nav">
@@ -54,6 +84,43 @@ export default function Footer() {
         .foot-brand h3 { font-family: var(--serif); font-size: clamp(24px, 5vw, 32px); font-weight: 500; margin: 0 0 16px; color: var(--fg); letter-spacing: -0.02em; }
         .foot-brand p { color: var(--fg-soft); font-size: 15px; line-height: 1.6; max-width: 320px; margin: 0; }
         
+        .visit-counter {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 32px;
+          padding: 8px 16px 8px 8px;
+          background: color-mix(in oklab, var(--accent) 10%, transparent);
+          border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+          border-radius: 999px;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          cursor: default;
+        }
+        .visit-counter:hover {
+          background: color-mix(in oklab, var(--accent) 15%, transparent);
+          border-color: var(--accent);
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 8px 24px -6px color-mix(in oklab, var(--accent) 50%, transparent);
+        }
+        .vc-icon {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--accent);
+          color: #061a14;
+          border-radius: 50%;
+          box-shadow: 0 0 12px color-mix(in oklab, var(--accent) 80%, transparent);
+          transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .visit-counter:hover .vc-icon {
+          transform: scale(1.1);
+        }
+        .vc-info { display: flex; flex-direction: column; gap: 3px; }
+        .vc-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--fg-soft); line-height: 1; }
+        .vc-count { font-size: 14px; font-weight: 600; color: var(--fg); line-height: 1; letter-spacing: 1px; }
+        
         .foot-nav { display: flex; gap: clamp(40px, 8vw, 100px); flex-wrap: wrap; }
         .nav-col { display: flex; flex-direction: column; gap: 16px; }
         .nav-col .heading { color: var(--accent); margin-bottom: 4px; font-weight: 600; display: block; }
@@ -79,6 +146,16 @@ export default function Footer() {
           .foot-content { margin-bottom: 60px; flex-direction: column; }
           .foot-nav { gap: 40px; }
           .base-left { flex-direction: column; align-items: flex-start; gap: 12px; }
+        }
+        
+        /* Light Theme Adjustments */
+        html[data-theme="light"] .vc-icon {
+          background: color-mix(in oklab, var(--accent) 45%, black);
+          color: #ffffff;
+        }
+        html[data-theme="light"] .visit-counter:hover {
+          background: color-mix(in oklab, var(--accent) 15%, transparent);
+          border-color: color-mix(in oklab, var(--accent) 45%, black);
         }
       `}</style>
     </footer>

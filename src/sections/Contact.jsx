@@ -6,18 +6,27 @@ const emailUser = 'darshanjogani';
 const emailDomain = 'outlook.com';
 const getEmail = () => `${emailUser}@${emailDomain}`;
 
+// Add your free Web3Forms access key here to enable silent background emails!
+// Get one for free at: https://web3forms.com/
+const WEB3FORMS_KEY = 'c5362e40-d690-40bc-ac65-698460b2635a';    // actual domain (for testing add different API for localhost)
+
 const SOCIALS = [
   { k: 'Email', v: getEmail(), getHref: () => `mailto:${getEmail()}`, icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg> },
   { k: 'GitHub', v: 'darshan-jogani', href: 'https://github.com/darshan-jogani', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg> },
   { k: 'LinkedIn', v: 'darshan-jogani', href: 'https://www.linkedin.com/in/darshan-jogani/', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg> },
   { k: 'ORCID', v: '0009-0007-8954-4934', href: 'https://orcid.org/0009-0007-8954-4934', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
   { k: 'Location', v: 'DLR Stuttgart, Germany', href: 'https://www.dlr.de/en/tt', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> },
-  { k: 'Languages', v: 'English · German · Hindi · Gujarati', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> },
+  { k: 'Languages', v: [
+    { name: 'English', href: 'https://translate.google.com/?sl=en&tl=en&text=Hello&op=translate' },
+    { name: 'German', href: 'https://translate.google.com/?sl=en&tl=de&text=Hello&op=translate' },
+    { name: 'Hindi', href: 'https://translate.google.com/?sl=en&tl=hi&text=Hello&op=translate' },
+    { name: 'Gujarati', href: 'https://translate.google.com/?sl=en&tl=gu&text=Hello&op=translate' }
+  ], icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> },
 ];
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', topic: 'collaboration', msg: '' });
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState('idle'); // 'idle', 'sending', 'success', 'error'
 
   // Get current time in Stuttgart, Germany regardless of visitor's location
   const formatter = new Intl.DateTimeFormat('en-US', {
@@ -52,13 +61,50 @@ export default function Contact() {
     card.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    const subject = encodeURIComponent(`[Portfolio · ${form.topic}] ${form.name || 'Hello'}`);
-    const body = encodeURIComponent(`From: ${form.name} <${form.email}>\n\n${form.msg}`);
-    window.location.href = `mailto:${getEmail()}?subject=${subject}&body=${body}`;
-    setSent(true);
-    setTimeout(() => setSent(false), 5000);
+    setStatus('sending');
+
+    // Fallback if no Web3Forms key is provided (Plays the awesome animation, then opens Mail app)
+    if (WEB3FORMS_KEY === 'YOUR_WEB3FORMS_ACCESS_KEY') {
+      setTimeout(() => {
+        const subject = encodeURIComponent(`[Portfolio · ${form.topic}] ${form.name || 'Hello'}`);
+        const body = encodeURIComponent(`From: ${form.name} <${form.email}>\n\n${form.msg}`);
+        window.location.href = `mailto:${getEmail()}?subject=${subject}&body=${body}`;
+        setStatus('success');
+        setTimeout(() => { setStatus('idle'); setForm({ name: '', email: '', topic: 'collaboration', msg: '' }); }, 4000);
+      }, 1200);
+      return;
+    }
+
+    // Silent Background Submission via Web3Forms
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
+          name: form.name,
+          email: form.email,
+          subject: `[Portfolio · ${form.topic}] ${form.name}`,
+          message: form.msg
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        setStatus('success');
+        setTimeout(() => { setStatus('idle'); setForm({ name: '', email: '', topic: 'collaboration', msg: '' }); }, 4000);
+      } else {
+        console.error('Web3Forms API Error:', data.message);
+        throw new Error(data.message || 'Submission failed');
+      }
+    } catch (err) {
+      console.error('Submission Catch:', err);
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
+    }
   };
   return (
     <section id="contact" className="dark">
@@ -85,13 +131,34 @@ export default function Contact() {
                 </select>
               </div>
               <div className="field"><label>Message</label><textarea required value={form.msg} onChange={e => setForm({ ...form, msg: e.target.value })} placeholder="Tell me a little about what you're working on…"/></div>
-              <button className="btn btn-primary" type="submit">{sent ? '✓ Email opened' : 'Send Message →'}</button>
+              
+              <button className={`btn btn-primary btn-submit ${status}`} type="submit" disabled={status === 'sending' || status === 'success'}>
+                {status === 'idle' && 'Send Message →'}
+                {status === 'sending' && (
+                  <><svg className="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Transmitting...</>
+                )}
+                {status === 'success' && (
+                  <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Transmission Successful</>
+                )}
+                {status === 'error' && 'Error. Try Again →'}
+              </button>
             </form>
           </Reveal>
           <Reveal className="ct-side">
             <div className="ct-side-list">
               {SOCIALS.map(s => (
-                (s.href || s.getHref) ? (
+                Array.isArray(s.v) ? (
+                  <div key={s.k} className="ct-row static lang-row">
+                    <span className="k mono small">{s.icon} {s.k}</span>
+                    <div className="lang-tags">
+                      {s.v.map(lang => (
+                        <a key={lang.name} href={lang.href} target="_blank" rel="noreferrer" className="lang-tag" aria-label={`Say Hello in ${lang.name}`}>
+                          {lang.name}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ) : (s.href || s.getHref) ? (
                   <a key={s.k} className="ct-row" href={s.href || s.getHref()} target={s.href?.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
                     <span className="k mono small">{s.icon} {s.k}</span>
                     <span className="v">{s.v}<span className="arr">↗</span></span>
@@ -135,9 +202,12 @@ export default function Contact() {
         @media (max-width: 600px) {
           .ct-row { grid-template-columns: 1fr; gap: 4px; padding: 16px 0; align-items: flex-start; }
           .ct-row .v { justify-content: flex-start; }
+          .lang-tags { justify-content: flex-start; margin-top: 6px; }
         }
         .ct-row:last-child { border-bottom: 1px solid var(--rule-c); }
         .ct-row:not(.static):hover { padding-left: 8px; color: var(--accent); }
+        .ct-row.lang-row { padding-top: 24px; padding-bottom: 24px; align-items: flex-start; }
+        .ct-row.lang-row .k { margin-top: 6px; }
         .ct-row .k { color: var(--fg-soft); display: flex; align-items: center; gap: 8px; }
         .ct-row .k svg { color: var(--accent); transition: color .2s; }
         .ct-row:not(.static):hover .k { color: var(--accent); }
@@ -145,6 +215,23 @@ export default function Contact() {
         .ct-row:not(.static):hover .v { color: var(--accent); }
         .ct-row .arr { opacity: 0; transition: opacity .2s; margin-left: 8px; }
         .ct-row:hover .arr { opacity: 1; }
+        
+        .lang-tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; flex: 1; }
+        .lang-tag {
+          display: inline-block;
+          font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+          padding: 6px 12px; border-radius: 999px;
+          background: color-mix(in oklab, var(--fg) 5%, transparent);
+          color: var(--fg); text-decoration: none; border: 1px solid transparent;
+          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+          will-change: transform;
+        }
+        .lang-tag:hover {
+          background: color-mix(in oklab, var(--accent) 15%, transparent); color: var(--accent);
+          border-color: var(--accent); transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 6px 16px -6px color-mix(in oklab, var(--accent) 60%, transparent);
+        }
+        
         .ct-quote { position: relative; padding: 28px; background: var(--card); border: 1px solid var(--card-bd); border-radius: var(--radius); overflow: hidden;
           transition: all .3s cubic-bezier(0.175, 0.885, 0.32, 1.275); --mx: 50%; --my: 50%; }
         .ct-quote > * { position: relative; z-index: 2; }
@@ -171,6 +258,21 @@ export default function Contact() {
         .field select { width: 100%; padding: 12px 14px; border-radius: 4px; background: transparent; border: 1px solid var(--rule-c); color: var(--fg); font-family: var(--sans); font-size: 14px; transition: border-color .2s; }
         .field select:focus { outline: none; border-color: var(--accent); }
         .field select option { background: var(--bg); color: var(--fg); }
+        
+        .btn-submit { justify-content: center; gap: 10px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.4s, color 0.4s, border-color 0.4s, box-shadow 0.4s; will-change: transform; }
+        .btn-submit.sending {
+          background: color-mix(in oklab, var(--accent) 15%, transparent); color: var(--accent);
+          border-color: var(--accent); pointer-events: none;
+        }
+        .btn-submit.success {
+          background: #10b981; color: #fff; border-color: #10b981;
+          box-shadow: 0 8px 32px -8px #10b981; pointer-events: none; transform: scale(1.02);
+        }
+        .btn-submit.error {
+          background: #ef4444; color: #fff; border-color: #ef4444;
+        }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
       `}</style>
     </section>
   );

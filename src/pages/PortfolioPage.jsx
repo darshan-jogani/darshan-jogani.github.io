@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollProgress from '../components/ScrollProgress.jsx';
 import Nav from '../components/Nav.jsx';
@@ -10,7 +10,8 @@ import Publications from '../sections/Publications.jsx';
 import Talks from '../sections/Talks.jsx';
 import LabPortal from '../sections/LabPortal.jsx';
 import Contact from '../sections/Contact.jsx';
-import TweaksPanel from '../components/TweaksPanel.jsx';
+
+const TweaksPanel = lazy(() => import('../components/TweaksPanel.jsx'));
 
 function downloadCV() {
   const url = '/Darshan-Jogani-CV.pdf';
@@ -57,7 +58,9 @@ export default function PortfolioPage() {
         <Contact />
       </main>
       <Footer />
-      <TweaksPanel open={tweaksOpen} onClose={() => setTweaksOpen(false)} />
+      <Suspense fallback={null}>
+        <TweaksPanel open={tweaksOpen} onClose={() => setTweaksOpen(false)} />
+      </Suspense>
     </>
   );
 }
