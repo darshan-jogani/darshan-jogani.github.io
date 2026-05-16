@@ -107,7 +107,8 @@ export default function Research() {
       </div>
       <div className="container" style={{ position: 'relative', zIndex: 2 }}>
         <Reveal clip className="section-label"><span className="num">02</span><span>Research</span></Reveal>
-        <Reveal clip as="h2" className="section-title">Three <em>pillars</em> of my work — and the <em>equations</em> behind them.</Reveal>
+        <Reveal clip as="h2" className="section-title">Three <em>pillars</em> of my work.</Reveal>
+        {/*<Reveal clip as="h2" className="section-title">Three <em>pillars</em> of my work — and the <em>equations</em> behind them.</Reveal>*/}
         <Reveal as="p" className="section-intro">From electron transport at the catalyst surface to the levelized cost of hydrogen at the plant gate — same problem, three lenses.</Reveal>
 
         <div className="pillars">

@@ -1,28 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function Footer() {
   const [visits, setVisits] = useState('...');
+  const footerRef = useRef(null);
 
   useEffect(() => {
-    // Intelligently check if we've already incremented in this session
-    const hasVisited = sessionStorage.getItem('dj_visited');
-    const action = hasVisited ? '' : '/up';
-    
-    fetch(`https://api.counterapi.dev/v1/darshanjogani/portfolio${action}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.count) {
-          setVisits(data.count.toLocaleString());
-          sessionStorage.setItem('dj_visited', 'true');
-        }
-      })
-      .catch(() => {
-        setVisits('Online'); // Safe fallback if API is temporarily unreachable
-      });
+    // Defer the fetch until the footer is actually visible to eliminate scroll lag
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        observer.disconnect();
+        
+        const hasVisited = sessionStorage.getItem('dj_visited');
+        const action = hasVisited ? '' : '/up';
+        
+        // Use AbortController to prevent the fetch from hanging indefinitely
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        fetch(`https://api.counterapi.dev/v1/darshanjogani/portfolio${action}`, { signal: controller.signal })
+          .then(res => {
+            clearTimeout(timeoutId);
+            if (!res.ok) throw new Error('API Error');
+            return res.json();
+          })
+          .then(data => {
+            if (data && data.count) {
+              setVisits(data.count.toLocaleString());
+              sessionStorage.setItem('dj_visited', 'true');
+            } else throw new Error('Invalid format');
+          })
+          .catch(() => {
+            setVisits('Online'); // Safe fallback if blocked by adblockers or offline
+          });
+      }
+    }, { rootMargin: '200px' });
+
+    if (footerRef.current) observer.observe(footerRef.current);
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <footer className="foot">
+    <footer className="foot" ref={footerRef}>
       <div className="foot-flare"></div>
       <div className="container">
         <div className="foot-content">

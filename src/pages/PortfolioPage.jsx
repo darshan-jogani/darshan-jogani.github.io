@@ -10,6 +10,7 @@ import Publications from '../sections/Publications.jsx';
 import Talks from '../sections/Talks.jsx';
 import LabPortal from '../sections/LabPortal.jsx';
 import Contact from '../sections/Contact.jsx';
+import { TranslationProvider } from '../context/TranslationContext.jsx';
 
 const TweaksPanel = lazy(() => import('../components/TweaksPanel.jsx'));
 
@@ -45,7 +46,7 @@ export default function PortfolioPage() {
   }, []);
 
   return (
-    <>
+    <TranslationProvider>
       <ScrollProgress />
       <Nav onCV={cv} onTweaks={() => setTweaksOpen(o => !o)} />
       <main>
@@ -61,6 +62,6 @@ export default function PortfolioPage() {
       <Suspense fallback={null}>
         <TweaksPanel open={tweaksOpen} onClose={() => setTweaksOpen(false)} />
       </Suspense>
-    </>
+    </TranslationProvider>
   );
 }

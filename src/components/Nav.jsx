@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle.jsx';
+import LangToggle from './LangToggle.jsx';
+import { useTranslation } from '../context/TranslationContext.jsx';
 
 const links = [
-  ['#about', 'About'],
-  ['#research', 'Research'],
-  ['#publications', 'Pubs'],
-  ['#talks', 'Talks'],
-  ['#contact', 'Contact'],
+  ['#about', 'nav.about'],
+  ['#research', 'nav.research'],
+  ['#publications', 'nav.pubs'],
+  ['#talks', 'nav.talks'],
+  ['#contact', 'nav.contact'],
 ];
 
 export default function Nav({ onCV, onTweaks }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
   useEffect(() => {
     const fn = () => setScrolled(document.documentElement.scrollTop > 40);
     window.addEventListener('scroll', fn, { passive: true });
@@ -38,13 +41,14 @@ export default function Nav({ onCV, onTweaks }) {
           {links.map(([href, label]) => (
             <li key={href}>
               <a href={href} onClick={(e) => handleClick(e, href)}>
-                {label}
+                {t(label)}
               </a>
             </li>
           ))}
         </ul>
         <div className="nav-actions">
           <ThemeToggle />
+          <LangToggle />
           <button className="btn nav-tweaks-btn hide-mobile" onClick={() => { if(onTweaks) onTweaks(); }} aria-label="Tweaks">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="gear-icon">
               <circle cx="12" cy="12" r="3"></circle>
@@ -73,7 +77,7 @@ export default function Nav({ onCV, onTweaks }) {
         </div>
         <div className="drawer-links">
           {links.map(([href, label]) => (
-            <a key={href} href={href} onClick={(e) => handleClick(e, href)}>{label}</a>
+            <a key={href} href={href} onClick={(e) => handleClick(e, href)}>{t(label)}</a>
           ))}
           <Link to="/lab" className="drawer-lab-link" onClick={() => setOpen(false)}>
             Research Lab ↗

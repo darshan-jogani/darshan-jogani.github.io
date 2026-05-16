@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Reveal from '../components/Reveal.jsx';
+import { Canvas, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
 // Obfuscate the email to protect against simple scraping bots
-const emailUser = 'darshanjogani';
-const emailDomain = 'outlook.com';
+const emailUser = 'abc';
+const emailDomain = 'xyz.com';
 const getEmail = () => `${emailUser}@${emailDomain}`;
 
 // Add your free Web3Forms access key here to enable silent background emails!
@@ -11,7 +13,7 @@ const getEmail = () => `${emailUser}@${emailDomain}`;
 const WEB3FORMS_KEY = 'c5362e40-d690-40bc-ac65-698460b2635a';    // actual domain (for testing add different API for localhost)
 
 const SOCIALS = [
-  { k: 'Email', v: getEmail(), getHref: () => `mailto:${getEmail()}`, icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg> },
+  // { k: 'Email', v: getEmail(), getHref: () => `mailto:${getEmail()}`, icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg> },
   { k: 'GitHub', v: 'darshan-jogani', href: 'https://github.com/darshan-jogani', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg> },
   { k: 'LinkedIn', v: 'darshan-jogani', href: 'https://www.linkedin.com/in/darshan-jogani/', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg> },
   { k: 'ORCID', v: '0009-0007-8954-4934', href: 'https://orcid.org/0009-0007-8954-4934', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> },
@@ -23,6 +25,25 @@ const SOCIALS = [
     { name: 'Gujarati', href: 'https://translate.google.com/?sl=en&tl=gu&text=Hello&op=translate' }
   ], icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> },
 ];
+
+function ContactFloatingShape({ position, rotation, type }) {
+  const ref = useRef();
+  useFrame((s) => {
+    if (!ref.current) return;
+    const t = s.clock.elapsedTime;
+    ref.current.position.y = position[1] + Math.sin(t * 0.4 + position[0]) * 0.4;
+    ref.current.rotation.x = rotation[0] + t * 0.1;
+    ref.current.rotation.y = rotation[1] + t * 0.15;
+  });
+  return (
+    <mesh ref={ref} position={position} rotation={rotation}>
+      {type === 'tetrahedron' && <tetrahedronGeometry args={[1.1, 0]} />}
+      {type === 'torusKnot' && <torusKnotGeometry args={[0.7, 0.15, 64, 8]} />}
+      {type === 'cone' && <coneGeometry args={[1.2, 1.6, 4]} />}
+      <meshBasicMaterial color="#00d4aa" wireframe transparent opacity={0.12} />
+    </mesh>
+  );
+}
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', topic: 'collaboration', msg: '' });
@@ -107,8 +128,15 @@ export default function Contact() {
     }
   };
   return (
-    <section id="contact" className="dark">
-      <div className="container">
+    <section id="contact" className="dark" style={{ position: 'relative', overflow: 'hidden' }}>
+      <div className="ct-bg" style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+        <Canvas camera={{ position: [0, 0, 5], fov: 50 }} dpr={[1, 2]}>
+          <ContactFloatingShape position={[-5, 2, -2]} rotation={[0.5, 0.2, 0]} type="torusKnot" />
+          <ContactFloatingShape position={[4, -2, -3]} rotation={[-0.4, 0.4, 0.1]} type="tetrahedron" />
+          <ContactFloatingShape position={[0, -4, -5]} rotation={[0.2, -0.1, 0.5]} type="cone" />
+        </Canvas>
+      </div>
+      <div className="container" style={{ position: 'relative', zIndex: 2 }}>
         <Reveal clip className="section-label"><span className="num">12</span><span>Contact</span></Reveal>
         <Reveal clip as="h2" className="section-title">Let's <em>build something</em>.</Reveal>
         <Reveal as="p" className="section-intro">Open to research collaborations, industrial partnerships, conference invitations and graduate-student inquiries. The fastest path is email — but pick your channel.</Reveal>
